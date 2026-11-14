@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html { scroll-behavior: smooth; }
+    body {
+        @apply bg-white text-slate-600 antialiased;
+        font-family: "Manrope Variable", Arial, sans-serif;
+        overflow-x: hidden;
+    }
+    ::selection { background: #FAAF3A; color: #071827; }
+    :focus-visible { outline: 2px solid #FAAF3A; outline-offset: 2px; }
+}
+
+@layer utilities {
+    .bg-dots {
+        background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.2px, transparent 1.2px);
+        background-size: 26px 26px;
+    }
+    .bg-dots-dark {
+        background-image: radial-gradient(rgba(17, 57, 89, 0.12) 1.2px, transparent 1.2px);
+        background-size: 26px 26px;
+    }
+    .placeholder-mark {
+        @apply rounded bg-amber-100 px-1.5 py-0.5 text-[0.92em] font-semibold text-navy-800;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
