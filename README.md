@@ -34,4 +34,5 @@ German is the default and lives at `/...`, English lives at `/en/...` (same patt
 - Details the customer still has to confirm (phone, e-mail, managing director, VAT ID) are `PLACEHOLDER(...)` values in `src/data/site.js` (with a German and an English text) or in the legal texts in `src/i18n/strings.*.js`, and show as highlighted `[...]` on the page. Search the repo for `PLACEHOLDER` to find them all.
 - `public/index.html` has `noindex, nofollow` while the site is a preview. Remove it before going live.
 - The contact form does not send anything yet.
-- No photos or logos from irti-robotics.com are included yet. The robot drawing is an own SVG.
+- Images from irti-robotics.com live in `public/images/<category>/` (`logos`, `awards`, `fanuc`, `industries`, `applications`, `events`); `src/data/images.js` lists them with their sizes and says which page shows which. Photos are WebP (at most 1600 px wide, event photos 1200 px); client logos and award images keep their original format. Alt text: company name for logos, otherwise the title of the page or section. A test checks that every file exists, is listed, has the right format and stays below 1.5 MB. The robot drawing in the hero is an own SVG.
+- Events page: `/veranstaltungen` (DE) and `/en/events` (EN), the photo gallery of the source events page, lazy-loaded.

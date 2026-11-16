@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import PageHero from "@/components/PageHero";
 import CtaBand from "@/components/CtaBand";
+import Photo from "@/components/Photo";
 import { Container } from "@/components/ui";
 import { getApplicationById, applicationPath } from "@/data/applications";
+import { PROJECT_IMAGES } from "@/data/images";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
@@ -20,9 +22,9 @@ export default function ProjectsPage() {
                             const app = item.application ? getApplicationById(lang, item.application) : null;
                             return (
                                 <li key={item.title} className="flex flex-col overflow-hidden rounded-xl border border-slate-200" data-testid="project-card">
-                                    <div className="relative h-36 overflow-hidden bg-navy" aria-hidden="true">
-                                        <div className="bg-dots absolute inset-0" />
-                                        <span className="absolute bottom-3 left-5 text-6xl font-extrabold text-amber/80">{String(i + 1).padStart(2, "0")}</span>
+                                    <div className="relative h-48 overflow-hidden bg-navy">
+                                        <Photo file={PROJECT_IMAGES[i]} alt={item.title} className="h-full w-full object-cover" />
+                                        <span className="absolute bottom-3 left-5 text-6xl font-extrabold text-amber [text-shadow:0_2px_8px_rgba(0,0,0,0.6)]" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                                     </div>
                                     <div className="flex flex-1 flex-col p-7">
                                         <h2 className="text-xl font-bold text-navy">{item.title}</h2>

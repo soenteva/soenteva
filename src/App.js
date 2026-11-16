@@ -6,6 +6,7 @@ import ProjectsPage from "@/pages/ProjectsPage";
 import { IndustriesIndexPage, IndustryPage } from "@/pages/IndustriesPages";
 import { ApplicationsIndexPage, ApplicationPage } from "@/pages/ApplicationsPages";
 import CareerPage from "@/pages/CareerPage";
+import EventsPage from "@/pages/EventsPage";
 import ContactPage from "@/pages/ContactPage";
 import { ImpressumPage, PrivacyPage } from "@/pages/LegalPages";
 import NotFoundPage from "@/pages/NotFoundPage";
@@ -18,6 +19,7 @@ const PAGES = [
     ["industries", IndustriesIndexPage],
     ["applications", ApplicationsIndexPage],
     ["career", CareerPage],
+    ["events", EventsPage],
     ["contact", ContactPage],
     ["legal", ImpressumPage],
     ["privacy", PrivacyPage],

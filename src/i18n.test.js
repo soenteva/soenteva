@@ -73,3 +73,40 @@ describe("switching the language keeps the same page", () => {
         expect(switchLangPath("/anwendungen/gibt-es-nicht", "en")).toBe("/en");
     });
 });
+
+describe("events page", () => {
+    test("has one path per language: /veranstaltungen and /en/events", () => {
+        expect(PAGE_PATHS.events).toEqual({ de: "/veranstaltungen", en: "/en/events" });
+        expect(pagePath("de", "events")).toBe("/veranstaltungen");
+        expect(pagePath("en", "events")).toBe("/en/events");
+        expect(langFromPath("/veranstaltungen")).toBe("de");
+        expect(langFromPath("/en/events")).toBe("en");
+    });
+
+    test("the language switch maps the events page in both directions, with or without a trailing slash", () => {
+        expect(switchLangPath("/veranstaltungen", "en")).toBe("/en/events");
+        expect(switchLangPath("/en/events", "de")).toBe("/veranstaltungen");
+        expect(switchLangPath("/veranstaltungen/", "en")).toBe("/en/events");
+        expect(switchLangPath("/en/events/", "de")).toBe("/veranstaltungen");
+        expect(switchLangPath("/veranstaltungen", "de")).toBe("/veranstaltungen");
+        expect(switchLangPath("/en/events", "en")).toBe("/en/events");
+        expect(switchLangPath("/events", "en")).toBe("/en");
+    });
+
+    test("the texts are only the heading and the intro of the source page, no invented text", () => {
+        expect(STRINGS.de.events).toEqual({ title: "Veranstaltungen", intro: "Entdecken Sie die neuesten Ausstellungen, Feiern und Branchenpräsentationen von IRTI Robotics." });
+        expect(STRINGS.en.events).toEqual({ title: "Events", intro: "Explore IRTI Robotics’ latest exhibitions, celebrations, and industry showcases." });
+        expect(STRINGS.de.nav.items.events).toBe("Veranstaltungen");
+        expect(STRINGS.en.nav.items.events).toBe("Events");
+    });
+
+    test("the home page and company page carry the headings of the new sections", () => {
+        expect(STRINGS.de.home.referencesTitle).toBe("Referenzen der IRTI-Gruppe");
+        expect(STRINGS.en.home.referencesTitle).toBe("References of the IRTI group");
+        for (const lang of LANGS) expect(STRINGS[lang].company.awardsTitle.trim()).not.toBe("");
+    });
+
+    test("no Pune address or +91 phone number is in any text", () => {
+        expect(JSON.stringify(STRINGS)).not.toMatch(/Pune|\+91/);
+    });
+});

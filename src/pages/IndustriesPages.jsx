@@ -1,9 +1,11 @@
 import { Link, useParams } from "react-router-dom";
 import PageHero from "@/components/PageHero";
 import CtaBand from "@/components/CtaBand";
+import Photo from "@/components/Photo";
 import { Container, SectionHeading } from "@/components/ui";
 import { getIndustries, getIndustry, industryPath } from "@/data/industries";
 import { getApplicationById, applicationPath } from "@/data/applications";
+import { INDUSTRY_IMAGES } from "@/data/images";
 import { fill, useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import NotFoundPage from "@/pages/NotFoundPage";
@@ -26,6 +28,7 @@ export function IndustriesIndexPage() {
                         {getIndustries(lang).map((i) => (
                             <li key={i.id}>
                                 <Link to={industryPath(lang, i.id)} className="group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-7 transition hover:border-navy hover:shadow-lg">
+                                    <Photo file={INDUSTRY_IMAGES[i.id].tile} alt={i.title} className="mb-4 h-[90px] w-[90px] rounded-lg object-cover" />
                                     <h2 className="text-xl font-bold text-navy">{i.title}</h2>
                                     <p className="mt-2 flex-1 text-sm leading-relaxed">{i.short}</p>
                                     <span className="mt-5 text-sm font-bold text-navy group-hover:text-amber-600">{S.common.learnMore}</span>
@@ -60,6 +63,15 @@ export function IndustryPage() {
                             {related.map((a) => <li key={a.id}><Link to={applicationPath(lang, a.id)} className="block px-5 py-4 font-bold text-navy hover:bg-navy-50">{a.title}</Link></li>)}
                         </ul>
                     </aside>
+                </Container>
+            </section>
+            <section className="pb-20" data-testid="industry-photos">
+                <Container>
+                    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {INDUSTRY_IMAGES[industry.id].photos.map((file) => (
+                            <li key={file}><Photo file={file} alt={fill(s.detailTitle, { title: industry.title })} className="aspect-[16/10] w-full rounded-xl object-cover" /></li>
+                        ))}
+                    </ul>
                 </Container>
             </section>
             <section className="bg-navy-50 py-16">

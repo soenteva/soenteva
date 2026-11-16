@@ -26,4 +26,5 @@ export const NAV = [
     { key: "industries", menu: "industries" },
     { key: "applications", menu: "applications" },
     { key: "career" },
+    { key: "events" },
 ];

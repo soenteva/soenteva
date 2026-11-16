@@ -108,7 +108,7 @@ export const INDUSTRIES_DE = [
         short: "Computergestützte Fertigung: Skulptur, Oberflächenbearbeitung, Mehrachsfräsen.",
         paragraphs: [
             "Wir liefern computergestützte Fertigungslösungen (CAM) für hochpräzise Produktionsprozesse, darunter komplexes Skulptieren, Oberflächenbearbeitung und mehrachsiges Fräsen. Unsere CAM-integrierten Automationssysteme führen Werkzeugbahnen für anspruchsvolle Geometrien, Freiformflächen und detaillierte Skulpturen an einer großen Bandbreite von Werkstoffen exakt aus.",
-            "Ausgelegt für präzise, wiederholbare Fertigung, verbessern unsere CAM-Lösungen Oberflächenqualität, Maßgenauigkeit und Prozesskonstanz. Von der Integration der digitalen Konstruktion bis zum automatisierten Skulptieren und Finishing unterstützen wir Hersteller bei hochwertigen Ergebnissen und effizienten Abläufen.",
+            "Ausgelegt für präzise, wiederholbare Fertigung, verbessern unsere CAM-Lösungen Oberflächenqualität, Maßgenauigkeit und Prozesskonstanz. Von der Integration der digitalen Konstruktion bis zum automatisierten Skulptieren und Endbearbeitung unterstützen wir Hersteller bei hochwertigen Ergebnissen und effizienten Abläufen.",
         ],
         related: ["skulptur-3d-druck", "maschinenbeschickung"],
     },

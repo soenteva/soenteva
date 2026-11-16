@@ -1,8 +1,10 @@
 import { Link, useParams } from "react-router-dom";
 import PageHero from "@/components/PageHero";
 import CtaBand from "@/components/CtaBand";
+import Photo from "@/components/Photo";
 import { Container, SectionHeading } from "@/components/ui";
 import { getApplications, getApplication, getMoreApplications, applicationPath } from "@/data/applications";
+import { APPLICATION_BANNER, APPLICATION_IMAGES } from "@/data/images";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import NotFoundPage from "@/pages/NotFoundPage";
@@ -55,6 +57,7 @@ export function ApplicationsIndexPage() {
                         ))}
                     </dl>
                     <p className="mt-6 text-xs text-slate-400">{s.figuresNote}</p>
+                    <Photo file={APPLICATION_BANNER} alt={s.heroTitle} className="mt-12 w-full rounded-xl" data-testid="applications-banner" />
                 </Container>
             </section>
             <CtaBand title={s.ctaTitle} text={s.ctaText} />
@@ -100,6 +103,7 @@ export function ApplicationPage() {
                     <ul className="mt-12 grid gap-5 md:grid-cols-2">
                         {app.solutions.map((sol, i) => (
                             <li key={sol.t} className="rounded-xl border border-white/15 bg-white/5 p-7">
+                                {APPLICATION_IMAGES[app.id][i] && <Photo file={APPLICATION_IMAGES[app.id][i]} alt={sol.t} className="mb-5 aspect-video w-full rounded-lg object-cover" />}
                                 <span className="text-sm font-extrabold tracking-widest text-amber">{num(i)}</span>
                                 <h3 className="mt-2 text-xl font-bold">{sol.t}</h3>
                                 <p className="mt-2 leading-relaxed text-navy-200">{sol.d}</p>

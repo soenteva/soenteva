@@ -1,8 +1,11 @@
+import fs from "fs";
+import path from "path";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import App from "@/App";
 import { getApplications } from "@/data/applications";
 import { getIndustries } from "@/data/industries";
+import { APPLICATION_IMAGES, AWARD_IMAGES, CLIENT_LOGOS, EVENT_PHOTOS, INDUSTRY_IMAGES, PROJECT_IMAGES } from "@/data/images";
 import { LANGS, PAGE_PATHS, STRINGS, pagePath } from "@/i18n";
 
 let container, root;
@@ -27,8 +30,11 @@ const q = (selector) => container.querySelector(selector);
 const all = (selector) => [...container.querySelectorAll(selector)];
 const click = (el) => act(() => el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
 const hrefs = (selector) => all(selector).map((a) => a.getAttribute("href"));
+// The file in public/ an <img> points at.
+const fileOf = (img) => path.join(process.cwd(), "public", decodeURI(new URL(img.getAttribute("src"), "http://localhost").pathname));
+const alts = (selector) => all(selector).map((img) => img.getAttribute("alt"));
 
-const HERO = { de: "Die Zukunft der smarten Industrieautomation", en: "The future of smart industrial automation" };
+const HERO = { de: "Die Zukunft der intelligenten Industrieautomation", en: "The future of smart industrial automation" };
 const SLASH = { de: "anwendungen", en: "applications" };
 
 describe.each(LANGS)("site in %s", (lang) => {
@@ -126,8 +132,9 @@ describe.each(LANGS)("site in %s", (lang) => {
     test("navigation and footer link to every page of this language only", () => {
         open(p("home"));
         const nav = hrefs('[data-testid="navbar"] nav a');
-        for (const key of ["company", "projects", "industries", "applications", "career", "contact"]) expect(nav).toContain(p(key));
+        for (const key of ["company", "projects", "industries", "applications", "career", "events", "contact"]) expect(nav).toContain(p(key));
         const footer = hrefs('[data-testid="footer"] a');
+        expect(footer).toContain(p("events"));
         expect(footer).toContain(p("legal"));
         expect(footer).toContain(p("privacy"));
         expect(hrefs('[data-testid="logo"]')[0]).toBe(p("home"));
@@ -135,6 +142,98 @@ describe.each(LANGS)("site in %s", (lang) => {
         const other = lang === "en" ? (h) => !h.startsWith("/en") : (h) => h.startsWith("/en");
         const stray = hrefs("a").filter((h) => h.startsWith("/")).filter(other).filter((h) => !all('[data-testid^="lang-switch"] a').some((a) => a.getAttribute("href") === h));
         expect(stray).toEqual([]);
+    });
+
+    test("the events page shows its heading, the intro of the source page and the whole gallery, lazy-loaded", () => {
+        open(p("events"));
+        expect(window.location.pathname).toBe(lang === "en" ? "/en/events" : "/veranstaltungen");
+        expect(q("h1").textContent).toBe(lang === "en" ? "Events" : "Veranstaltungen");
+        expect(q("h1").textContent).toBe(S.events.title);
+        expect(q('[data-testid="page-hero"] p.text-lg').textContent).toBe(S.events.intro);
+        expect(document.title).toBe(`${S.events.title} | Sönteva Automatisierung GmbH`);
+        expect(document.documentElement.lang).toBe(lang);
+        const photos = all('[data-testid="events-gallery"] img');
+        expect(photos).toHaveLength(EVENT_PHOTOS.length);
+        for (const img of photos) {
+            expect(img.getAttribute("loading")).toBe("lazy");
+            expect(img.getAttribute("alt")).toBe(S.events.title);
+            expect(Number(img.getAttribute("width"))).toBeGreaterThan(0);
+            expect(Number(img.getAttribute("height"))).toBeGreaterThan(0);
+        }
+        expect(photos.map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual(EVENT_PHOTOS.map((f) => `/images/${f}`));
+        // Nothing but the heading, the intro and the photos: no other text on the page apart from navigation and footer.
+        expect(all('main h2, main h3, main figcaption, main p').map((e) => e.textContent)).toEqual([S.events.intro]);
+    });
+
+    test("the events page is only reachable under its own path of this language", () => {
+        const other = lang === "en" ? "/veranstaltungen" : "/en/events";
+        open(other);
+        expect(document.documentElement.lang).toBe(lang === "en" ? "de" : "en");
+        open(`${lang === "en" ? "/en" : ""}/events-gibt-es-nicht`);
+        expect(q('[data-testid="not-found"]')).not.toBeNull();
+    });
+
+    test("the home page shows all client logos under the references heading, with the company name as alt text", () => {
+        open(p("home"));
+        const section = q('[data-testid="references"]');
+        expect(section.querySelector("h2").textContent).toBe(lang === "en" ? "References of the IRTI group" : "Referenzen der IRTI-Gruppe");
+        const logos = all('[data-testid="references"] img');
+        expect(logos).toHaveLength(37);
+        expect(alts('[data-testid="references"] img')).toEqual(CLIENT_LOGOS.map((l) => l.name));
+        for (const img of logos) expect(img.getAttribute("loading")).toBe("lazy");
+        expect(logos.map((img) => fs.existsSync(fileOf(img)))).not.toContain(false);
+        expect(q('[data-testid="intro-photo"]').getAttribute("alt")).toBe(S.home.introTitle);
+    });
+
+    test("the company page shows the team photo, the values photo and all nine awards", () => {
+        open(p("company"));
+        expect(q('[data-testid="company-photo"]').getAttribute("alt")).toBe(S.company.heroTitle);
+        expect(q('[data-testid="values-photo"]').getAttribute("alt")).toBe(S.company.valuesTitle);
+        expect(q('[data-testid="awards"] h2').textContent).toBe(S.company.awardsTitle);
+        expect(all('[data-testid="awards"] img').map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual(AWARD_IMAGES.map((f) => `/images/${f}`));
+        expect(alts('[data-testid="awards"] img')).toEqual(AWARD_IMAGES.map(() => S.company.awardsTitle));
+    });
+
+    test("the projects page shows one photo per project, titled like the project", () => {
+        open(p("projects"));
+        expect(alts('[data-testid="project-card"] img')).toEqual(S.projects.items.map((i) => i.title));
+        expect(all('[data-testid="project-card"] img').map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual(PROJECT_IMAGES.map((f) => `/images/${f}`));
+    });
+
+    test("the industry overview shows a picture per industry and each detail page its photos, titled like the page", () => {
+        open(p("industries"));
+        expect(alts('[data-testid="industries-list"] img')).toEqual(industries.map((i) => i.title));
+        for (const i of industries) {
+            open(`${p("industries")}/${i.slug}`);
+            const photos = all('[data-testid="industry-photos"] img');
+            expect(photos).toHaveLength(INDUSTRY_IMAGES[i.id].photos.length);
+            for (const img of photos) expect(img.getAttribute("alt")).toBe(q("h1").textContent);
+        }
+    });
+
+    test("every solution of an application page shows its picture, titled like the solution", () => {
+        for (const a of apps) {
+            open(`${p("applications")}/${a.slug}`);
+            expect(alts('[data-testid="solutions"] img')).toEqual(a.solutions.map((s) => s.t));
+            expect(all('[data-testid="solutions"] img')).toHaveLength(APPLICATION_IMAGES[a.id].length);
+        }
+        open(p("applications"));
+        expect(q('[data-testid="applications-banner"]').getAttribute("alt")).toBe(S.applications.heroTitle);
+    });
+
+    test("every page of this language has images that exist and carry alt text, and no Pune address or +91 number", () => {
+        const urls = [...Object.keys(PAGE_PATHS).map(p), ...apps.map((a) => `${p("applications")}/${a.slug}`), ...industries.map((i) => `${p("industries")}/${i.slug}`), `${lang === "en" ? "/en" : ""}/does-not-exist`];
+        let total = 0;
+        for (const url of urls) {
+            open(url);
+            for (const img of all("img")) {
+                total += 1;
+                expect(`${url} ${img.getAttribute("src")} alt="${(img.getAttribute("alt") || "").trim()}"`).not.toMatch(/alt=""$/);
+                expect(`${url} ${img.getAttribute("src")} ${fs.existsSync(fileOf(img))}`).toMatch(/true$/);
+            }
+            expect(container.textContent).not.toMatch(/Pune|\+91/);
+        }
+        expect(total).toBeGreaterThan(200);
     });
 
     test("the mobile menu opens and closes", () => {
@@ -200,6 +299,20 @@ describe("language switch", () => {
         expect(window.location.pathname).toBe("/anwendungen/pressenautomation");
         expect(q("h1").textContent).toBe("Pressenautomation");
         expect(document.documentElement.lang).toBe("de");
+    });
+
+    test("the events page switches between /veranstaltungen and /en/events by click", () => {
+        open("/veranstaltungen");
+        expect(q("h1").textContent).toBe("Veranstaltungen");
+        expect(q('[data-testid="lang-switch-en"]').getAttribute("href")).toBe("/en/events");
+        click(q('[data-testid="lang-switch-en"]'));
+        expect(window.location.pathname).toBe("/en/events");
+        expect(q("h1").textContent).toBe("Events");
+        expect(document.documentElement.lang).toBe("en");
+        expect(all('[data-testid="events-gallery"] img')).toHaveLength(EVENT_PHOTOS.length);
+        click(q('[data-testid="lang-switch-de"]'));
+        expect(window.location.pathname).toBe("/veranstaltungen");
+        expect(q("h1").textContent).toBe("Veranstaltungen");
     });
 
     test("a 404 switches to the home page of the other language", () => {

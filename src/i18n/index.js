@@ -15,6 +15,7 @@ export const PAGE_PATHS = {
     industries: { de: "/branchen", en: "/en/industries" },
     applications: { de: "/anwendungen", en: "/en/applications" },
     career: { de: "/karriere", en: "/en/career" },
+    events: { de: "/veranstaltungen", en: "/en/events" },
     contact: { de: "/kontakt", en: "/en/contact" },
     legal: { de: "/impressum", en: "/en/legal-notice" },
     privacy: { de: "/datenschutz", en: "/en/privacy" },

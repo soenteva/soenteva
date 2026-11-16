@@ -21,7 +21,7 @@ export const EN = {
         menu: "Menu",
         close: "Close",
         contact: "Contact",
-        items: { company: "Company", projects: "Projects", industries: "Industries", applications: "Applications", career: "Career" },
+        items: { company: "Company", projects: "Projects", industries: "Industries", applications: "Applications", career: "Career", events: "Events" },
         allIndustries: "All industries",
         allApplications: "All applications",
         langSwitch: "Choose language",
@@ -116,6 +116,7 @@ export const EN = {
         processCopy: "From concept and simulation to line handover.",
         whyEyebrow: "Why Sönteva",
         whyTitle: "What speaks for us",
+        referencesTitle: "References of the IRTI group",
         ctaTitle: "Let's automate smarter together",
         ctaText: "Press shop automation, palletizing, machine tending or an individual solution: talk to our team about your task.",
     },
@@ -148,6 +149,7 @@ export const EN = {
         goalsTitle: "Our goals",
         valuesEyebrow: "Values",
         valuesTitle: "What drives us",
+        awardsTitle: "Awards",
         whyEyebrow: "Why Sönteva",
         whyTitle: "What speaks for us",
         ctaTitle: "Talk to us about your project",
@@ -215,6 +217,11 @@ export const EN = {
         detailEyebrow: "Application",
         overview: "Overview",
         sidebarTitle: "All applications",
+    },
+    events: {
+        title: "Events",
+        // Intro text of the source events page.
+        intro: "Explore IRTI Robotics’ latest exhibitions, celebrations, and industry showcases.",
     },
     career: {
         title: "Career",

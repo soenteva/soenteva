@@ -17,7 +17,7 @@ function useMenus() {
 }
 
 const linkCls = ({ isActive }) =>
-    `rounded px-3 py-2 text-sm font-semibold transition-colors ${isActive ? "text-amber" : "text-white hover:text-amber"}`;
+    `rounded px-2 py-2 text-sm font-semibold xl:px-3 transition-colors ${isActive ? "text-amber" : "text-white hover:text-amber"}`;
 
 function DesktopItem({ item, menus }) {
     const { S, p } = useI18n();
@@ -72,8 +72,8 @@ export default function Navbar() {
                 <Logo />
                 <nav className="hidden items-center gap-1 lg:flex" aria-label={S.nav.main}>
                     {NAV.map((item) => <DesktopItem key={item.key} item={item} menus={menus} />)}
-                    <LangSwitch className="ml-4" />
-                    <Link to={p("contact")} className="ml-4 rounded-md bg-amber px-5 py-2.5 text-sm font-bold text-navy-900 transition-colors hover:bg-amber-600" data-testid="nav-contact">{S.nav.contact}</Link>
+                    <LangSwitch className="ml-2 xl:ml-4" />
+                    <Link to={p("contact")} className="ml-2 rounded-md bg-amber px-5 py-2.5 xl:ml-4 text-sm font-bold text-navy-900 transition-colors hover:bg-amber-600" data-testid="nav-contact">{S.nav.contact}</Link>
                 </nav>
                 <div className="flex items-center gap-3 lg:hidden">
                     <LangSwitch testid="lang-switch-compact" />

@@ -32,7 +32,7 @@ export const APPLICATIONS_DE = [
             { t: "Einpressen und Fügen", d: "Roboter-Einpress-, Schnapp- und Fügeprozesse mit Kraft- und Wegüberwachung für reproduzierbare Verbindungen." },
             { t: "Prüfung und Qualitätsautomation", d: "Bildverarbeitungsbasierte Prüfung und Funktionstests direkt im Montageprozess für Fehlervermeidung." },
         ],
-        cta: { title: "Montage effizienter gestalten?", text: "Mehr Tempo, Genauigkeit und Konstanz durch robotergestützte Montage: von der präzisen Bauteilplatzierung bis zur nahtlosen Integration." },
+        cta: { title: "Montage effizienter gestalten?", text: "Höhere Geschwindigkeit, Genauigkeit und Konstanz durch robotergestützte Montage: von der präzisen Bauteilplatzierung bis zur nahtlosen Integration." },
     },
     {
         slug: "anlagenautomation",
@@ -95,7 +95,7 @@ export const APPLICATIONS_DE = [
         solutions: [
             { t: "Automatisiertes Schmelzegießen", d: "Roboter handhaben und gießen Schmelze mit genauer Dosierung und kontrolliertem Fluss, bei minimaler Hitzeexposition für das Personal." },
             { t: "Roboter-Sandkernhandling", d: "Automatisches Einlegen, Positionieren und Entnehmen von Sandkernen für Maßgenauigkeit und weniger Kernschäden." },
-            { t: "Automatisches Gesenk-Be- und -Entladen", d: "Hochtraglast-Roboter für schnelle, reproduzierbare Gesenkwechsel und kürzere Stillstandszeiten." },
+            { t: "Automatisches Gesenk-Be- und -Entladen", d: "Roboter für hohe Traglasten für schnelle, reproduzierbare Gesenkwechsel und kürzere Stillstandszeiten." },
         ],
         cta: { title: "Schmiede und Gießerei automatisieren?", text: "Mehr Prozesssicherheit, Bedienersicherheit und Effizienz bei Schmelzehandhabung, Gesenkbetrieb, Entgraten und Nachbearbeitung, rund um die Uhr." },
     },
@@ -112,7 +112,7 @@ export const APPLICATIONS_DE = [
         benefits: [
             "Mehr Effizienz in allen Handhabungsprozessen",
             "Präzises Roboter-Pick-and-Place mit gleichbleibender Genauigkeit",
-            "Nahtlose Einbindung in Fördersysteme",
+            "Reibungslose Einbindung in Fördersysteme",
             "Mehr Sicherheit durch weniger manuelle Handhabung",
             "Zuverlässiger Umgang mit schweren, gefährlichen oder repetitiven Aufgaben",
             "Industrietauglicher Dauerbetrieb mit minimalem Stillstand",
@@ -153,7 +153,7 @@ export const APPLICATIONS_DE = [
             { t: "CNC-Maschinen be- und entladen", d: "Präzise Teilepositionierung, kürzere Taktzeiten und zuverlässiger unbemannter Betrieb in der Bearbeitung." },
             { t: "Spritzgussmaschinen-Handling", d: "Entnahme von Teilen, Einlegen von Einlegeteilen und Stapeln, für gleichbleibende Teilequalität und weniger Maschinenstillstand." },
             { t: "Pressen und Druckguss", d: "Schwere Roboter für heiße, scharfkantige oder schwere Bauteile mit stabilen, reproduzierbaren Zyklen." },
-            { t: "Prüfung und Nachbearbeitung", d: "Teiletransfer für Prüfen, Waschen, Entgraten, Markieren und Finishing mit nahtloser Anbindung an nachgelagerte Prozesse." },
+            { t: "Prüfung und Nachbearbeitung", d: "Teiletransfer für Prüfen, Waschen, Entgraten, Markieren und Endbearbeitung mit reibungsloser Anbindung an nachgelagerte Prozesse." },
         ],
         cta: { title: "Maschinenbeschickung automatisieren?", text: "Mehr Produktivität, kürzere Taktzeiten und mehr Bedienersicherheit: von der CNC-Bearbeitung über Spritzguss bis zum Presswerk." },
     },
@@ -219,7 +219,7 @@ export const APPLICATIONS_DE = [
         slug: "pressenautomation",
         title: "Pressenautomation",
         short: "Blechhandling, Pressenverkettung und Teileentnahme, sicher und taktgenau.",
-        tagline: "Präzise Automation für sichere, gleichmäßige und leistungsstarke Presswerke.",
+        tagline: "Präzise Automation für sichere, gleichmäßige und leistungsfähige Presswerke.",
         lead: "Robotergestützte Pressenautomation für mehr Sicherheit, Genauigkeit und Produktivität in der Blechumformung. Die Systeme automatisieren das Einlegen von Blechplatinen, den Transfer von Presse zu Presse, das Entnehmen fertiger Teile, die Trennung von Abfall und das Palettieren. Industrieroboter, Bildverarbeitung und intelligente Sicherheitssteuerungen sorgen für konstante Taktzeiten und Qualität an Einzel- und Tandempressenlinien.",
         overview: [
             "Pressenautomation setzt Industrieroboter, Automationssysteme und intelligente Steuerungen im Presswerk ein, etwa für Blechhandling, Platinenbe- und -entladung, Transfer von Presse zu Presse, Teileausrichtung und Stapeln. Roboterhandhabung, visionsgeführte Automation und Sicherheitsverriegelungen steigern die Produktionsgeschwindigkeit, sichern konstante Taktzeiten und verringern manuelle Eingriffe bei Prozessen mit hohen Kräften.",
@@ -308,7 +308,7 @@ export const APPLICATIONS_DE = [
             { t: "Metall-3D-Druck-Automation", d: "Additive Fertigung mit hochfesten Metallen und präziser Robotersteuerung." },
             { t: "Skulpturen im 3D-Druck", d: "Komplexe Skulpturen durch hochpräzisen Roboter-3D-Druck." },
         ],
-        cta: { title: "Skulptur- oder 3D-Druck-Prozess automatisieren?", text: "Mehr Präzision, Wiederholbarkeit und Tempo vom digitalen Modell bis zum fertigen Bauteil. Sprechen Sie uns zu Ihrem Anwendungsfall an." },
+        cta: { title: "Skulptur- oder 3D-Druck-Prozess automatisieren?", text: "Mehr Präzision, Wiederholbarkeit und Geschwindigkeit vom digitalen Modell bis zum fertigen Bauteil. Sprechen Sie uns zu Ihrem Anwendungsfall an." },
     },
 ];
 

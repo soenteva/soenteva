@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import RobotArt from "@/components/RobotArt";
 import CtaBand from "@/components/CtaBand";
+import Photo from "@/components/Photo";
 import { ButtonLink, Container, SectionHeading } from "@/components/ui";
 import { getApplications, getMoreApplications, applicationPath } from "@/data/applications";
 import { getIndustries, industryPath } from "@/data/industries";
+import { CLIENT_LOGOS, COMPANY_IMAGES } from "@/data/images";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
@@ -57,6 +59,7 @@ export default function HomePage() {
                     <div className="lg:col-span-5">
                         <SectionHeading eyebrow={h.introEyebrow} title={h.introTitle} />
                         <ButtonLink to={p("company")} variant="dark" className="mt-8">{h.introMore}</ButtonLink>
+                        <Photo file={COMPANY_IMAGES.home} alt={h.introTitle} className="mt-10 w-full max-w-sm rounded-xl" data-testid="intro-photo" />
                     </div>
                     <div className="space-y-5 text-lg leading-relaxed lg:col-span-7">
                         {h.introText.map((t) => <p key={t}>{t}</p>)}
@@ -126,6 +129,19 @@ export default function HomePage() {
                             <li key={w.t} className="border-t-4 border-navy pt-5">
                                 <h3 className="text-lg font-bold text-navy">{w.t}</h3>
                                 <p className="mt-2 leading-relaxed">{w.d}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </Container>
+            </section>
+
+            <section className="py-20 lg:py-28" data-testid="references">
+                <Container>
+                    <SectionHeading title={h.referencesTitle} />
+                    <ul className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                        {CLIENT_LOGOS.map((logo) => (
+                            <li key={logo.file} className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-4">
+                                <Photo file={logo.file} alt={logo.name} className="h-16 w-full object-contain" />
                             </li>
                         ))}
                     </ul>

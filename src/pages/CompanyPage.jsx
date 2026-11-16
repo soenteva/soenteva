@@ -1,7 +1,9 @@
 import PageHero from "@/components/PageHero";
 import CtaBand from "@/components/CtaBand";
+import Photo from "@/components/Photo";
 import { Container, SectionHeading } from "@/components/ui";
 import { COMPANY } from "@/data/site";
+import { AWARD_IMAGES, COMPANY_IMAGES } from "@/data/images";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
@@ -27,6 +29,7 @@ export default function CompanyPage() {
                                 <div><dt className="font-bold text-navy">{c.factCustomers}</dt><dd>{c.factCustomersValue}</dd></div>
                             </dl>
                         </div>
+                        <Photo file={COMPANY_IMAGES.team} alt={c.heroTitle} className="mt-6 w-full rounded-xl" data-testid="company-photo" />
                     </aside>
                 </Container>
             </section>
@@ -53,11 +56,14 @@ export default function CompanyPage() {
             <section className="bg-navy-50 py-20" data-testid="values">
                 <Container>
                     <SectionHeading eyebrow={c.valuesEyebrow} title={c.valuesTitle} />
-                    <ul className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
-                        {S.values.map((v) => (
-                            <li key={v.t} className="border-t-4 border-amber pt-5"><h3 className="text-lg font-bold text-navy">{v.t}</h3><p className="mt-2 leading-relaxed">{v.d}</p></li>
-                        ))}
-                    </ul>
+                    <div className="mt-10 grid items-start gap-10 lg:grid-cols-12">
+                        <Photo file={COMPANY_IMAGES.values} alt={c.valuesTitle} className="w-full rounded-xl lg:col-span-4" data-testid="values-photo" />
+                        <ul className="grid gap-x-10 gap-y-8 md:grid-cols-2 lg:col-span-8">
+                            {S.values.map((v) => (
+                                <li key={v.t} className="border-t-4 border-amber pt-5"><h3 className="text-lg font-bold text-navy">{v.t}</h3><p className="mt-2 leading-relaxed">{v.d}</p></li>
+                            ))}
+                        </ul>
+                    </div>
                 </Container>
             </section>
 
@@ -67,6 +73,19 @@ export default function CompanyPage() {
                     <ul className="mt-10 grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
                         {S.whyUs.map((w) => (
                             <li key={w.t} className="border-t-4 border-navy pt-5"><h3 className="text-lg font-bold text-navy">{w.t}</h3><p className="mt-2 leading-relaxed">{w.d}</p></li>
+                        ))}
+                    </ul>
+                </Container>
+            </section>
+
+            <section className="bg-navy-50 py-20" data-testid="awards">
+                <Container>
+                    <SectionHeading title={c.awardsTitle} />
+                    <ul className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                        {AWARD_IMAGES.map((file) => (
+                            <li key={file} className="flex aspect-[4/5] items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                                <Photo file={file} alt={c.awardsTitle} className="h-full w-full object-contain" />
+                            </li>
                         ))}
                     </ul>
                 </Container>
