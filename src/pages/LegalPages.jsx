@@ -1,16 +1,17 @@
 import { Link } from "react-router-dom";
 import PageHero from "@/components/PageHero";
-import { Container, Ph } from "@/components/ui";
+import Section from "@/components/Section";
+import { Ph } from "@/components/ui";
 import { COMPANY } from "@/data/site";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
 const Draft = ({ text }) => (
-    <p className="mb-10 rounded-lg border-l-4 border-amber bg-amber-100 px-5 py-4 text-sm font-semibold text-navy-900" data-testid="legal-draft">{text}</p>
+    <p className="mb-10 rounded-2xl border border-lime/30 border-l-4 border-l-lime bg-lime/10 px-5 py-4 text-sm font-semibold text-[#fffffd]" data-testid="legal-draft">{text}</p>
 );
-const H = ({ children }) => <h2 className="mt-10 text-xl font-extrabold text-navy">{children}</h2>;
-const P = ({ children }) => <p className="mt-3 leading-relaxed">{children}</p>;
-const linkCls = "font-bold text-navy underline decoration-amber decoration-2 underline-offset-4";
+const H = ({ children }) => <h2 className="mt-10 font-display text-[clamp(0.95rem,4vw,1.25rem)] font-bold leading-snug text-[#fffffd] whole-words">{children}</h2>;
+const P = ({ children }) => <p className="mt-3 leading-relaxed text-mist">{children}</p>;
+const linkCls = "font-semibold text-lime underline decoration-lime/50 decoration-2 underline-offset-4 hover:decoration-lime";
 
 const COMPANY_FIELDS = { name: COMPANY.name, street: COMPANY.streetFromRegister, city: COMPANY.city, email: COMPANY.email };
 
@@ -33,11 +34,11 @@ export function ImpressumPage() {
     return (
         <>
             <PageHero eyebrow={S.common.legalEyebrow} title={i.title} crumbs={[{ label: i.title }]} />
-            <section className="py-16" data-testid="impressum">
-                <Container className="max-w-3xl">
+            <Section tone="teal" pad="md" testid="impressum">
+                <div className="max-w-3xl">
                     <Draft text={l.draft} />
                     <H>{i.h.info}</H>
-                    <P><strong className="text-navy">{COMPANY.name}</strong><br />{COMPANY.streetFromRegister}<br />{COMPANY.city}</P>
+                    <P><strong className="text-[#fffffd]">{COMPANY.name}</strong><br />{COMPANY.streetFromRegister}<br />{COMPANY.city}</P>
                     <H>{i.h.represented}</H>
                     <P>{i.managing} <Ph value={COMPANY.managingDirector} /></P>
                     <H>{i.h.register}</H>
@@ -50,8 +51,8 @@ export function ImpressumPage() {
                     <P><Ph text={l.ph.responsible} /></P>
                     <H>{i.h.disputes}</H>
                     <P><Ph text={l.ph.disputes} /></P>
-                </Container>
-            </section>
+                </div>
+            </Section>
         </>
     );
 }
@@ -64,8 +65,8 @@ export function PrivacyPage() {
     return (
         <>
             <PageHero eyebrow={S.common.legalEyebrow} title={v.heroTitle} crumbs={[{ label: v.title }]} />
-            <section className="py-16" data-testid="datenschutz">
-                <Container className="max-w-3xl">
+            <Section tone="teal" pad="md" testid="datenschutz">
+                <div className="max-w-3xl">
                     <Draft text={l.draft} />
                     {v.sections.map((sec) => (
                         <div key={sec.h}>
@@ -73,8 +74,8 @@ export function PrivacyPage() {
                             <P><Parts parts={sec.parts} /></P>
                         </div>
                     ))}
-                </Container>
-            </section>
+                </div>
+            </Section>
         </>
     );
 }

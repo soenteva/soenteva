@@ -25,8 +25,8 @@ test("every address is answered with the single page app, so deep links also wor
     expect(config.rewrites).toEqual([{ source: "/(.*)", destination: "/index.html" }]);
 });
 
-test("the site uses the IRTI colours", () => {
+test("the site uses the dark teal and lime palette of the design reference, not the old IRTI navy and amber", () => {
     const tailwind = read("tailwind.config.js");
-    expect(tailwind).toContain("#113959");
-    expect(tailwind).toContain("#FAAF3A");
+    for (const colour of ["#001920", "#022d33", "#e1ff7c"]) expect(tailwind).toContain(colour);
+    for (const old of ["#113959", "#FAAF3A"]) expect(tailwind).not.toContain(old);
 });

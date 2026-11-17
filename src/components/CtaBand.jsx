@@ -1,17 +1,21 @@
-import { Container, ButtonLink } from "@/components/ui";
+import DisplayHeading from "@/components/DisplayHeading";
+import PillButton from "@/components/PillButton";
+import Reveal from "@/components/Reveal";
+import Section from "@/components/Section";
 import { useI18n } from "@/i18n";
 
-export default function CtaBand({ title, text, label, to }) {
+// Closing band of a page: heading with one highlighted word, text and a pill button to the contact page.
+export default function CtaBand({ title, highlight, text, label, to }) {
     const { S, p } = useI18n();
     return (
-        <section className="bg-amber" data-testid="cta-band">
-            <Container className="flex flex-col gap-6 py-14 md:flex-row md:items-center md:justify-between">
-                <div className="max-w-3xl">
-                    <h2 className="text-2xl font-extrabold leading-tight text-navy-900 sm:text-3xl">{title}</h2>
-                    {text && <p className="mt-3 text-base leading-relaxed text-navy-800">{text}</p>}
+        <Section tone="glass" pad="md" testid="cta-band">
+            <Reveal className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-12">
+                <div className="max-w-2xl">
+                    <DisplayHeading title={title} highlight={highlight} size="lg" />
+                    {text && <p className="mt-4 text-base leading-relaxed text-mist">{text}</p>}
                 </div>
-                <ButtonLink to={to || p("contact")} variant="dark" className="shrink-0">{label || S.common.inquiry}</ButtonLink>
-            </Container>
-        </section>
+                <PillButton to={to || p("contact")} className="self-start md:self-auto md:shrink-0">{label || S.common.inquiry}</PillButton>
+            </Reveal>
+        </Section>
     );
 }

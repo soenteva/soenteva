@@ -98,3 +98,6 @@ export const ChevronDownIcon = (props) => (
         <path {...line} d="M6 9.5l6 6 6-6" />
     </svg>
 );
+
+// Icons of the six "why us" items, in the order of S.whyUs.
+export const WHY_ICONS = [RobotIcon, TargetIcon, FlagIcon, BoltIcon, WrenchIcon, AwardIcon];

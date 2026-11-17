@@ -81,20 +81,50 @@ describe.each(LANGS)("site in %s", (lang) => {
         }
     });
 
-    test("the home page has its own dark header and footer; every other page keeps the standard ones", () => {
-        open(p("home"));
-        expect(q('[data-testid="logo"] rect').getAttribute("fill")).toBe("#e1ff7c");
-        expect(q('[data-testid="navbar"]').className).not.toContain("bg-navy");
-        expect(q('[data-testid="footer"]').className).not.toContain("bg-navy-900");
-        // The footer keeps the address and ends its last column with a button to the contact page.
-        expect(q('[data-testid="footer-address"]').textContent).toContain("Karlsruhe");
-        expect(hrefs('[data-testid="footer"] a')).toContain(p("contact"));
-        for (const key of ["company", "projects", "industries", "applications", "career", "events"]) {
-            open(p(key));
-            expect(q('[data-testid="logo"] rect').getAttribute("fill")).toBe("#FAAF3A");
-            expect(q('[data-testid="navbar"]').className).toContain("bg-navy");
-            expect(q('[data-testid="footer"]').className).toContain("bg-navy-900");
+    // Every kind of page: static pages, a detail page of each kind, the 404 page and the legal pages.
+    const allUrls = () => [...Object.keys(PAGE_PATHS).map(p), `${p("applications")}/${apps[0].slug}`, `${p("industries")}/${industries[0].slug}`, `${p("applications")}/does-not-exist`];
+
+    test("every page has the same dark header and footer (no separate home version)", () => {
+        for (const url of allUrls()) {
+            open(url);
+            expect(q('[data-testid="logo"] rect').getAttribute("fill")).toBe("#e1ff7c");
+            expect(q('[data-testid="navbar"]').className).toContain("bg-[#032e35]");
+            expect(q('[data-testid="footer"]').className).toContain("linear-gradient");
+            expect(q('[data-testid="footer-address"]').textContent).toContain("Karlsruhe");
+            expect(hrefs('[data-testid="footer"] a')).toContain(p("contact"));
+            expect(q('[data-testid="nav-contact"]').getAttribute("href")).toBe(p("contact"));
+            expect(container.firstElementChild.className).toContain("bg-deep-950");
         }
+    });
+
+    test("no page uses a class of the old navy, amber or slate palette; only the placeholder chip stays light amber", () => {
+        for (const url of allUrls()) {
+            open(url);
+            const classes = all("*").map((el) => (typeof el.className === "string" ? el.className : "")).join(" ");
+            expect(`${url}: ${classes.match(/(?<![a-z])(navy|amber|slate)-[\w/[\].]+/g) || []}`).toBe(`${url}: `);
+            expect(` ${classes} `).not.toMatch(/\sbg-white\s|\stext-black\s/); // translucent white (bg-white/20) is the pill ring and fine
+        }
+    });
+
+    test("every h1, h2 and h3 of every page is set in the display font with whole words; the h1 is a page title in the hero band", () => {
+        for (const url of allUrls()) {
+            open(url);
+            expect(all("h1")).toHaveLength(1);
+            expect(q('[data-testid="page-hero"] h1, [data-testid="hero"] h1')).not.toBeNull();
+            for (const h of all("main h1, main h2, main h3, footer h3")) {
+                const cls = h.className;
+                expect(`${url} ${h.textContent.slice(0, 30)} ${/font-display/.test(cls)} ${/whole-words/.test(cls)}`).toBe(`${url} ${h.textContent.slice(0, 30)} true true`);
+            }
+        }
+    });
+
+    test("page titles: a title of several words has exactly one lime word, a one-word title stays white", () => {
+        open(p("company"));
+        expect(all("h1 span")).toHaveLength(1);
+        expect(q("h1 span").textContent).toBe(S.company.heroTitle.split(" ").pop());
+        open(p("events"));
+        expect(S.events.title.split(" ")).toHaveLength(1);
+        expect(all("h1 span")).toHaveLength(0);
     });
 
     test("the home page uses only existing content: no text or logos of the design template, the awards and why-us items of the site", () => {
@@ -166,6 +196,14 @@ describe.each(LANGS)("site in %s", (lang) => {
         expect(q("h1").textContent).toBe(S.company.heroTitle);
         open(p("career"));
         expect(q("h1").textContent).toBe(S.career.heroTitle);
+    });
+
+    test("the figures of the applications page use the wide layout and show the values unchanged", () => {
+        open(p("applications"));
+        expect(all('[data-testid="applications-figures"] dd').map((d) => d.textContent)).toEqual(S.applications.figures.map((f) => f.value));
+        expect(q('[data-testid="applications-figures"] dl').className).toContain("xl:grid-cols-[repeat(4,auto)]");
+        open(p("home"));
+        expect(q('[data-testid="stats"] dl').className).toContain("md:grid-cols-4"); // the home page keeps the default layout
     });
 
     test("the contact form asks for the missing fields and for consent before it reacts", () => {

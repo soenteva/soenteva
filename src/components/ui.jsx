@@ -1,36 +1,31 @@
-import { Link } from "react-router-dom";
+import DisplayHeading from "@/components/DisplayHeading";
+import PillButton from "@/components/PillButton";
 import { t, useI18n } from "@/i18n";
 
-export const Container = ({ className = "", children }) => (
-    <div className={`mx-auto w-full max-w-7xl px-5 sm:px-8 ${className}`}>{children}</div>
+// Shared building blocks of the pages: the small lime label, the section heading, buttons, placeholder marks.
+
+export const Eyebrow = ({ children }) => (
+    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-lime">{children}</p>
 );
 
-export const Eyebrow = ({ children, light = false }) => (
-    <p className={`mb-3 text-xs font-bold uppercase tracking-[0.22em] ${light ? "text-amber" : "text-amber-600"}`}>{children}</p>
-);
-
-export const SectionHeading = ({ eyebrow, title, copy, light = false, className = "", testid }) => (
-    <div className={`max-w-3xl ${className}`} data-testid={testid}>
-        {eyebrow && <Eyebrow light={light}>{eyebrow}</Eyebrow>}
-        <h2 className={`text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl ${light ? "text-white" : "text-navy"}`}>{title}</h2>
-        {copy && <p className={`mt-4 text-lg leading-relaxed ${light ? "text-navy-200" : "text-slate-600"}`}>{copy}</p>}
+// Eyebrow, display heading (last word in lime unless `highlight` names one) and an optional text.
+export const SectionHeading = ({ eyebrow, title, copy, highlight, className = "", testid }) => (
+    <div className={`max-w-4xl ${className}`} data-testid={testid}>
+        {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+        <DisplayHeading title={title} highlight={highlight} />
+        {copy && <p className="mt-5 text-base leading-relaxed text-mist">{copy}</p>}
     </div>
 );
 
-const BTN = "inline-flex items-center justify-center rounded-md px-6 py-3.5 text-sm font-bold transition-colors";
-const VARIANTS = {
-    primary: "bg-amber text-navy-900 hover:bg-amber-600",
-    ghost: "border border-white/40 text-white hover:border-amber hover:text-amber",
-    dark: "bg-navy text-white hover:bg-navy-700",
-    outline: "border border-navy/30 text-navy hover:border-navy hover:bg-navy-50",
-};
+const GHOST = new Set(["ghost", "dark", "outline"]);
 
+// Pill buttons: a lime one (primary) and an outlined one (ghost; "dark" and "outline" are the same).
 export const ButtonLink = ({ to, variant = "primary", children, className = "", ...rest }) => (
-    <Link to={to} className={`${BTN} ${VARIANTS[variant]} ${className}`} {...rest}>{children}</Link>
+    <PillButton to={to} variant={GHOST.has(variant) ? "ghost" : "primary"} arrow={false} className={className} {...rest}>{children}</PillButton>
 );
 
 export const ButtonEl = ({ variant = "primary", children, className = "", ...rest }) => (
-    <button className={`${BTN} ${VARIANTS[variant]} ${className}`} {...rest}>{children}</button>
+    <PillButton variant={GHOST.has(variant) ? "ghost" : "primary"} arrow={false} className={className} {...rest}>{children}</PillButton>
 );
 
 // Marks a value the customer still has to confirm; shown highlighted so it is not overlooked.

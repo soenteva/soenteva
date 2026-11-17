@@ -1,7 +1,7 @@
 import { BentoColumn, BentoGrid } from "@/components/BentoGrid";
 import DisplayHeading from "@/components/DisplayHeading";
 import GlassCard from "@/components/GlassCard";
-import GlassCtaBand from "@/components/GlassCtaBand";
+import CtaBand from "@/components/CtaBand";
 import IconRow from "@/components/IconRow";
 import LogoBand from "@/components/LogoBand";
 import Photo from "@/components/Photo";
@@ -10,7 +10,7 @@ import Reveal from "@/components/Reveal";
 import Section from "@/components/Section";
 import SplitImageSection from "@/components/SplitImageSection";
 import StatBand from "@/components/StatBand";
-import { AwardIcon, BoltIcon, EyeIcon, FactoryIcon, FlagIcon, GearIcon, RobotIcon, TargetIcon, WrenchIcon } from "@/components/icons";
+import { EyeIcon, FactoryIcon, GearIcon, RobotIcon, TargetIcon, WHY_ICONS } from "@/components/icons";
 import { applicationPath, getApplicationById, getMoreApplications } from "@/data/applications";
 import { HOME_AWARD_IMAGES, HOME_FEATURED_APPLICATIONS, HOME_HERO_IMAGE, HOME_INDUSTRIES, HOME_PROCESS_IMAGES, HOME_PROMO_IMAGE } from "@/data/home";
 import { CLIENT_LOGOS, COMPANY_IMAGES, INDUSTRY_IMAGES } from "@/data/images";
@@ -19,7 +19,6 @@ import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
 const FEATURE_ICONS = [RobotIcon, FactoryIcon, GearIcon];
-const WHY_ICONS = [RobotIcon, TargetIcon, FlagIcon, BoltIcon, WrenchIcon, AwardIcon];
 const AWARD_TONES = ["teal", "moss", "moss", "teal"];
 const num = (i) => String(i + 1).padStart(2, "0");
 const body = "text-base leading-relaxed text-mist";
@@ -202,7 +201,7 @@ export default function HomePage() {
                 <div className="mt-12 text-center"><PillButton to={p("industries")} variant="ghost" arrow={false}>{S.nav.allIndustries}</PillButton></div>
             </Section>
 
-            <GlassCtaBand title={h.ctaTitle} text={h.ctaText} />
+            <CtaBand title={h.ctaTitle} text={h.ctaText} />
         </>
     );
 }

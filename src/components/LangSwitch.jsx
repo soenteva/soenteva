@@ -17,7 +17,7 @@ export default function LangSwitch({ testid = "lang-switch", className = "" }) {
                         lang={l}
                         hrefLang={l}
                         aria-current={l === current ? "true" : undefined}
-                        className={l === current ? "text-amber" : "text-white hover:text-amber"}
+                        className={l === current ? "text-lime" : "text-[#fffffd] hover:text-lime"}
                         data-testid={`${testid}-${l}`}
                     >
                         {l.toUpperCase()}

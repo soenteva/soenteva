@@ -3,10 +3,12 @@ import "@fontsource/unbounded/latin-700.css";
 // Large display heading with one highlighted word (lime). Words are never split (no hyphens, no break inside a
 // word: class whole-words), so the sizes below are chosen to fit the longest German words. Give `parts` = [before, highlighted, after]
 // (e.g. the hero title of the strings) or a `title` with the `highlight` text in it; without `highlight`
-// the last word is highlighted.
+// the last word is highlighted. A title of a single word is not highlighted (it stays white).
 export const splitTitle = (title, highlight) => {
     const text = String(title);
-    const hl = highlight || text.split(/\s+/).filter(Boolean).pop();
+    const words = text.split(/\s+/).filter(Boolean);
+    if (!highlight && words.length < 2) return [text, "", ""]; // a single word stays white
+    const hl = highlight || words.pop();
     const at = text.lastIndexOf(hl);
     if (at < 0) return [text, "", ""];
     return [text.slice(0, at), hl, text.slice(at + hl.length)];
@@ -17,7 +19,9 @@ const SIZES = {
     // Hero: sized by the screen width so its longest German word ("Industrieautomation.") always fits whole;
     // at lg the heading shares the row with the photo and is a little smaller.
     hero: "text-[clamp(1.15rem,5.9vw,3.5rem)] leading-[1.2] lg:text-[clamp(2rem,3.6vw,3rem)]",
-    xl: "text-[1.45rem] leading-[1.25] sm:text-[2.25rem] lg:text-[2.75rem] xl:text-[3.25rem]",
+    // Title of an inner page (h1): the longest German words ("Automationsanwendungen,") still fit whole at 390 px.
+    page: "text-[clamp(1.05rem,4.6vw,3rem)] leading-[1.2] md:text-[clamp(2rem,4.2vw,3.25rem)]",
+    xl: "text-[clamp(1.1rem,5.5vw,1.45rem)] leading-[1.25] sm:text-[2.25rem] lg:text-[2.75rem] xl:text-[3.25rem]",
     lg: "text-[1.3rem] leading-[1.3] sm:text-[1.875rem] lg:text-[2.25rem]",
     md: "text-[1.25rem] leading-[1.3] sm:text-[1.5rem]",
     sm: "text-[1.125rem] leading-snug",

@@ -1,6 +1,6 @@
 import PageHero from "@/components/PageHero";
 import Photo from "@/components/Photo";
-import { Container } from "@/components/ui";
+import Section from "@/components/Section";
 import { EVENT_PHOTOS } from "@/data/images";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
@@ -14,17 +14,15 @@ export default function EventsPage() {
     return (
         <>
             <PageHero title={e.title} crumbs={[{ label: e.title }]} lead={e.intro} />
-            <section className="py-16" data-testid="events-gallery">
-                <Container>
-                    <ul className="columns-2 gap-4 sm:columns-3 lg:columns-4">
-                        {EVENT_PHOTOS.map((file) => (
-                            <li key={file} className="mb-4 break-inside-avoid">
-                                <Photo file={file} alt={e.title} className="w-full rounded-lg bg-slate-100" />
-                            </li>
-                        ))}
-                    </ul>
-                </Container>
-            </section>
+            <Section tone="teal" pad="md" testid="events-gallery">
+                <ul className="columns-2 gap-4 sm:columns-3 lg:columns-4">
+                    {EVENT_PHOTOS.map((file) => (
+                        <li key={file} className="mb-4 break-inside-avoid">
+                            <Photo file={file} alt={e.title} className="w-full rounded-2xl border border-white/10 bg-deep-card" />
+                        </li>
+                    ))}
+                </ul>
+            </Section>
         </>
     );
 }

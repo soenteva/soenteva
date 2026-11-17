@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import PageHero from "@/components/PageHero";
-import { ButtonEl, Container, Ph } from "@/components/ui";
+import GlassCard from "@/components/GlassCard";
+import Section from "@/components/Section";
+import { ButtonEl, Ph } from "@/components/ui";
 import { COMPANY } from "@/data/site";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import { Link } from "react-router-dom";
 
-const inputCls = "w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-sm text-navy-900 outline-none focus:border-navy focus:ring-2 focus:ring-amber/60";
+const inputCls = "w-full rounded-xl border border-white/15 bg-deep-card px-4 py-3 text-sm text-[#fffffd] outline-none [color-scheme:dark] focus:border-lime focus:ring-2 focus:ring-lime/40";
 const Field = ({ label, required, children }) => (
-    <label className="block"><span className="mb-2 block text-sm font-semibold text-navy">{label}{required && <span aria-hidden="true"> *</span>}</span>{children}</label>
+    <label className="block"><span className="mb-2 block text-sm font-semibold text-[#fffffd]">{label}{required && <span aria-hidden="true"> *</span>}</span>{children}</label>
 );
 
 export default function ContactPage() {
@@ -27,8 +29,8 @@ export default function ContactPage() {
     return (
         <>
             <PageHero eyebrow={c.title} title={c.heroTitle} crumbs={[{ label: c.title }]} lead={c.heroLead} />
-            <section className="py-20" data-testid="contact">
-                <Container className="grid gap-12 lg:grid-cols-12">
+            <Section tone="teal" testid="contact">
+                <div className="grid gap-12 lg:grid-cols-12">
                     <form onSubmit={submit} className="lg:col-span-8" data-testid="contact-form" noValidate>
                         <div className="grid gap-5 sm:grid-cols-2">
                             <Field label={c.name} required><input className={inputCls} value={form.name} onChange={set("name")} autoComplete="name" data-testid="contact-name" /></Field>
@@ -45,27 +47,27 @@ export default function ContactPage() {
                             </Field>
                         </div>
                         <div className="mt-5"><Field label={c.message} required><textarea rows={5} className={inputCls} value={form.message} onChange={set("message")} data-testid="contact-message" /></Field></div>
-                        <label className="mt-5 flex items-start gap-3 text-sm">
-                            <input type="checkbox" checked={form.consent} onChange={set("consent")} className="mt-1 h-4 w-4 accent-navy" data-testid="contact-consent" />
-                            <span>{c.consent[0]}<Link to={p("privacy")} className="font-bold text-navy underline decoration-amber decoration-2 underline-offset-4">{c.consent[1]}</Link>{c.consent[2]}</span>
+                        <label className="mt-5 flex items-start gap-3 text-sm text-mist">
+                            <input type="checkbox" checked={form.consent} onChange={set("consent")} className="mt-1 h-4 w-4 accent-lime" data-testid="contact-consent" />
+                            <span>{c.consent[0]}<Link to={p("privacy")} className="font-semibold text-lime underline decoration-lime/50 decoration-2 underline-offset-4 hover:decoration-lime">{c.consent[1]}</Link>{c.consent[2]}</span>
                         </label>
                         <ButtonEl type="submit" className="mt-7" data-testid="contact-submit">{c.submit}</ButtonEl>
                     </form>
                     <aside className="lg:col-span-4" data-testid="contact-details">
-                        <div className="rounded-xl bg-navy p-8 text-white">
-                            <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-amber">{c.addressTitle}</h2>
-                            <address className="mt-4 space-y-1 not-italic leading-relaxed">
-                                <p className="font-bold">{COMPANY.name}</p>
+                        <GlassCard tone="moss" innerClassName="p-7 sm:p-8">
+                            <h2 className="font-display text-[0.95rem] font-bold leading-snug text-lime whole-words">{c.addressTitle}</h2>
+                            <address className="mt-4 space-y-1 not-italic leading-relaxed text-mist">
+                                <p className="font-semibold text-[#fffffd]">{COMPANY.name}</p>
                                 <p>{COMPANY.streetFromRegister}</p>
                                 <p>{COMPANY.city}</p>
                             </address>
-                            <h2 className="mt-8 text-sm font-bold uppercase tracking-[0.2em] text-amber">{c.directTitle}</h2>
-                            <p className="mt-4">{S.common.phone} <Ph value={COMPANY.phone} /></p>
-                            <p className="mt-1">{S.common.email} <Ph value={COMPANY.email} /></p>
-                        </div>
+                            <h2 className="mt-8 font-display text-[0.95rem] font-bold leading-snug text-lime whole-words">{c.directTitle}</h2>
+                            <p className="mt-4 text-mist">{S.common.phone} <Ph value={COMPANY.phone} /></p>
+                            <p className="mt-1 text-mist">{S.common.email} <Ph value={COMPANY.email} /></p>
+                        </GlassCard>
                     </aside>
-                </Container>
-            </section>
+                </div>
+            </Section>
         </>
     );
 }

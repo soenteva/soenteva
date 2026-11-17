@@ -4,14 +4,16 @@ import { MemoryRouter } from "react-router-dom";
 import { BentoColumn, BentoGrid } from "@/components/BentoGrid";
 import DisplayHeading, { splitTitle } from "@/components/DisplayHeading";
 import GlassCard from "@/components/GlassCard";
-import GlassCtaBand from "@/components/GlassCtaBand";
+import CtaBand from "@/components/CtaBand";
+import PageHero from "@/components/PageHero";
 import IconRow from "@/components/IconRow";
 import LogoBand from "@/components/LogoBand";
 import PillButton, { ArrowLink, stripArrow } from "@/components/PillButton";
 import Reveal from "@/components/Reveal";
 import Section from "@/components/Section";
 import SplitImageSection from "@/components/SplitImageSection";
-import StatBand from "@/components/StatBand";
+import StatBand, { StatGrid } from "@/components/StatBand";
+import { ButtonEl, ButtonLink, Eyebrow, Ph, SectionHeading } from "@/components/ui";
 import { RobotIcon } from "@/components/icons";
 import { CLIENT_LOGOS } from "@/data/images";
 import { STRINGS } from "@/i18n";
@@ -35,6 +37,8 @@ describe("DisplayHeading", () => {
         expect(splitTitle("Smart factory with smart robotics")).toEqual(["Smart factory with smart ", "robotics", ""]);
         expect(splitTitle("Smart factory with smart robotics", "smart")).toEqual(["Smart factory with ", "smart", " robotics"]); // last occurrence
         expect(splitTitle("Alpha beta", "gamma")).toEqual(["Alpha beta", "", ""]);
+        expect(splitTitle("Impressum")).toEqual(["Impressum", "", ""]); // a single word stays white
+        expect(splitTitle("Impressum", "Impressum")).toEqual(["", "Impressum", ""]); // unless a highlight is asked for
     });
 
     test("renders one heading with one highlighted lime span, keeping the full text", () => {
@@ -150,6 +154,88 @@ describe("StatBand", () => {
     });
 });
 
+describe("ui.jsx building blocks in the new style", () => {
+    test("SectionHeading: lime label, display heading with one lime word, text", () => {
+        render(<SectionHeading eyebrow="Goals" title="Our goals" copy="Text" testid="sh" />);
+        expect(q('[data-testid="sh"] p').className).toContain("text-lime");
+        expect(q("h2").textContent).toBe("Our goals");
+        expect(q("h2 span").textContent).toBe("goals");
+        expect(q("h2").className).toContain("whole-words");
+        expect(all("p").map((p) => p.textContent)).toEqual(["Goals", "Text"]);
+    });
+    test("Eyebrow is a small lime label", () => {
+        render(<Eyebrow>Label</Eyebrow>);
+        expect(q("p").className).toContain("text-lime");
+    });
+    test("ButtonLink and ButtonEl are pill buttons: primary is lime, dark and outline become the outlined pill, no arrow", () => {
+        render(<><ButtonLink to="/x">A</ButtonLink><ButtonLink to="/y" variant="dark">B</ButtonLink><ButtonEl type="submit" variant="outline">C</ButtonEl></>);
+        const [a, b] = all("a");
+        expect(a.getAttribute("href")).toBe("/x");
+        expect(a.querySelector("span").className).toContain("bg-lime");
+        expect(b.querySelector("span").className).not.toContain("bg-lime");
+        expect(q("button").getAttribute("type")).toBe("submit");
+        expect(all("svg")).toHaveLength(0);
+    });
+    test("Ph keeps the light amber chip so missing values stay visible", () => {
+        render(<><Ph text="Telefonnummer folgt" /><Ph value="plain" /></>);
+        expect(q("span.placeholder-mark").textContent).toBe("[Telefonnummer folgt]");
+        expect(container.textContent).toContain("plain");
+        expect(all(".placeholder-mark")).toHaveLength(1);
+    });
+});
+
+describe("PageHero", () => {
+    test("breadcrumb with home link, lime label, title as the only h1 and the lead text", () => {
+        render(<PageHero eyebrow="Company" title="About Sönteva and IRTI Robotics" lead="Lead text" crumbs={[{ label: "Company" }]} />);
+        expect(q("nav a").getAttribute("href")).toBe("/en");
+        expect(all("nav li").map((l) => l.textContent)).toEqual(["Home", "/Company"]);
+        expect(all("h1")).toHaveLength(1);
+        expect(q("h1 span").textContent).toBe("Robotics");
+        expect(q("p.text-lg").textContent).toBe("Lead text");
+        expect(q('[data-testid="page-hero"]').className).toContain("linear-gradient");
+    });
+    test("works without breadcrumb, label and lead", () => {
+        render(<PageHero title="Impressum" />);
+        expect(q("nav")).toBeNull();
+        expect(q("h1").textContent).toBe("Impressum");
+        expect(all("h1 span")).toHaveLength(0);
+    });
+});
+
+describe("StatGrid", () => {
+    const long = [{ value: "99 %", label: "A" }, { value: "30 bis 60 %", label: "B" }, { value: "200+", label: "C" }, { value: "0,001 mm", label: "D" }];
+    test("is the figures card on its own, without the band", () => {
+        render(<StatGrid items={[{ value: "1", label: "One" }, { value: "2", label: "Two" }]} />);
+        expect(all("dd").map((d) => d.textContent)).toEqual(["1", "2"]);
+        expect(q("section")).toBeNull();
+    });
+    test("the default layout keeps the big numbers, two columns on a phone and four from tablet width", () => {
+        render(<StatGrid items={long} />);
+        expect(q("dl").className).toContain("grid-cols-2");
+        expect(q("dl").className).toContain("md:grid-cols-4");
+        expect(q("dd").className).toContain("xl:text-[3.4rem]");
+        expect(q("dd").className).toContain("lg:text-[2.75rem]"); // 1000+ still fits its column at 1024 px
+        expect(q("dd").className).not.toContain("whitespace-nowrap");
+    });
+    test("wide: long values stay on one line with smaller numbers; one column, then two by two, then four sized to their content", () => {
+        render(<StatGrid items={long} wide />);
+        expect(all("dd").map((d) => d.textContent)).toEqual(["99 %", "30 bis 60 %", "200+", "0,001 mm"]); // texts unchanged
+        expect(q("dl").className).toContain("grid-cols-1");
+        expect(q("dl").className).toContain("md:grid-cols-2");
+        expect(q("dl").className).toContain("xl:grid-cols-[repeat(4,auto)]");
+        for (const dd of all("dd")) {
+            expect(dd.className).toContain("whitespace-nowrap");
+            expect(dd.className).toContain("lg:text-[2.5rem]");
+            expect(dd.className).toContain("leading-[1.2]"); // lines can no longer touch
+            expect(dd.className).not.toContain("leading-none");
+        }
+        // Dividers only where the four figures share one row.
+        const cells = [...q("dl").children];
+        expect(cells[0].className).not.toContain("border-l");
+        expect(cells.slice(1).every((c) => c.className.includes("xl:border-l") && !c.className.includes("md:border-l"))).toBe(true);
+    });
+});
+
 describe("LogoBand", () => {
     test("shows every logo exactly once, on a light tile, with the company name as alt text", () => {
         render(<LogoBand logos={CLIENT_LOGOS} />);
@@ -181,9 +267,9 @@ describe("SplitImageSection", () => {
     });
 });
 
-describe("GlassCtaBand", () => {
+describe("CtaBand", () => {
     test.each([["en", "Send inquiry", "/en/contact"], ["de", "Anfrage senden", "/kontakt"]])("%s: heading with highlight, text and a button to the contact page", (lang, label, href) => {
-        render(<GlassCtaBand title="Let's automate smarter together" text="Talk to us." />, lang === "en" ? "/en" : "/");
+        render(<CtaBand title="Let's automate smarter together" text="Talk to us." />, lang === "en" ? "/en" : "/");
         expect(q('[data-testid="cta-band"] h2').textContent).toBe("Let's automate smarter together");
         expect(q("h2 span").textContent).toBe("together");
         expect(q("p").textContent).toBe("Talk to us.");

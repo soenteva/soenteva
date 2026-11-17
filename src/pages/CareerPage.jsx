@@ -1,5 +1,8 @@
 import PageHero from "@/components/PageHero";
-import { Container, SectionHeading, Ph } from "@/components/ui";
+import GlassCard from "@/components/GlassCard";
+import Reveal from "@/components/Reveal";
+import Section from "@/components/Section";
+import { SectionHeading, Ph } from "@/components/ui";
 import { COMPANY } from "@/data/site";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
@@ -11,25 +14,28 @@ export default function CareerPage() {
     return (
         <>
             <PageHero eyebrow={c.title} title={c.heroTitle} crumbs={[{ label: c.title }]} lead={c.heroLead} />
-            <section className="py-20" data-testid="career-intro">
-                <Container className="max-w-4xl space-y-5 text-lg leading-relaxed">
+            <Section tone="teal" testid="career-intro">
+                <Reveal className="max-w-4xl space-y-5 text-lg leading-relaxed text-mist">
                     {c.intro.map((t) => <p key={t}>{t}</p>)}
-                </Container>
-            </section>
-            <section className="bg-navy-50 py-20" data-testid="rewards">
-                <Container>
-                    <SectionHeading eyebrow={c.rewardsEyebrow} title={c.rewardsTitle} />
-                    <ul className="mt-10 grid gap-6 md:grid-cols-3">
-                        {c.rewards.map((r) => <li key={r.t} className="border-t-4 border-amber bg-white p-7"><h3 className="text-lg font-bold text-navy">{r.t}</h3><p className="mt-2 leading-relaxed">{r.d}</p></li>)}
-                    </ul>
-                </Container>
-            </section>
-            <section className="py-20" data-testid="open-application">
-                <Container className="max-w-4xl">
+                </Reveal>
+            </Section>
+            <Section tone="dark" testid="rewards">
+                <Reveal><SectionHeading eyebrow={c.rewardsEyebrow} title={c.rewardsTitle} /></Reveal>
+                <ul className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {c.rewards.map((r, i) => (
+                        <GlassCard as="li" key={r.t} hover className={i === 2 ? "md:col-span-2 lg:col-span-1" : ""} innerClassName="h-full p-6">
+                            <h3 className="font-display text-[clamp(0.95rem,3.4vw,1.15rem)] font-bold leading-snug text-[#fffffd] whole-words">{r.t}</h3>
+                            <p className="mt-3 text-base leading-relaxed text-mist">{r.d}</p>
+                        </GlassCard>
+                    ))}
+                </ul>
+            </Section>
+            <Section tone="teal" testid="open-application">
+                <Reveal className="max-w-4xl">
                     <SectionHeading title={c.applyTitle} copy={c.applyCopy} />
-                    <p className="mt-6 text-lg">{c.applyTo} <span className="font-bold text-navy"><Ph value={COMPANY.email} /></span></p>
-                </Container>
-            </section>
+                    <p className="mt-6 text-lg text-mist">{c.applyTo} <span className="font-semibold text-[#fffffd]"><Ph value={COMPANY.email} /></span></p>
+                </Reveal>
+            </Section>
         </>
     );
 }
