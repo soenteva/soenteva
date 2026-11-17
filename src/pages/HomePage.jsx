@@ -1,154 +1,208 @@
-import { Link } from "react-router-dom";
-import RobotArt from "@/components/RobotArt";
-import CtaBand from "@/components/CtaBand";
+import { BentoColumn, BentoGrid } from "@/components/BentoGrid";
+import DisplayHeading from "@/components/DisplayHeading";
+import GlassCard from "@/components/GlassCard";
+import GlassCtaBand from "@/components/GlassCtaBand";
+import IconRow from "@/components/IconRow";
+import LogoBand from "@/components/LogoBand";
 import Photo from "@/components/Photo";
-import { ButtonLink, Container, SectionHeading } from "@/components/ui";
-import { getApplications, getMoreApplications, applicationPath } from "@/data/applications";
-import { getIndustries, industryPath } from "@/data/industries";
-import { CLIENT_LOGOS, COMPANY_IMAGES } from "@/data/images";
+import PillButton, { ArrowLink, stripArrow } from "@/components/PillButton";
+import Reveal from "@/components/Reveal";
+import Section from "@/components/Section";
+import SplitImageSection from "@/components/SplitImageSection";
+import StatBand from "@/components/StatBand";
+import { AwardIcon, BoltIcon, EyeIcon, FactoryIcon, FlagIcon, GearIcon, RobotIcon, TargetIcon, WrenchIcon } from "@/components/icons";
+import { applicationPath, getApplicationById, getMoreApplications } from "@/data/applications";
+import { HOME_AWARD_IMAGES, HOME_FEATURED_APPLICATIONS, HOME_HERO_IMAGE, HOME_INDUSTRIES, HOME_PROCESS_IMAGES, HOME_PROMO_IMAGE } from "@/data/home";
+import { CLIENT_LOGOS, COMPANY_IMAGES, INDUSTRY_IMAGES } from "@/data/images";
+import { getIndustryById, industryPath } from "@/data/industries";
 import { useI18n } from "@/i18n";
 import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
+const FEATURE_ICONS = [RobotIcon, FactoryIcon, GearIcon];
+const WHY_ICONS = [RobotIcon, TargetIcon, FlagIcon, BoltIcon, WrenchIcon, AwardIcon];
+const AWARD_TONES = ["teal", "moss", "moss", "teal"];
 const num = (i) => String(i + 1).padStart(2, "0");
+const body = "text-base leading-relaxed text-mist";
+
+const IMAGE_SHAPE = { 1: "aspect-[16/8]", 2: "aspect-[4/3] lg:aspect-[4/5.2]", 3: "aspect-[4/3] md:aspect-[16/7] lg:aspect-[4/5.4]" };
 
 export default function HomePage() {
     const { lang, S, p } = useI18n();
     const h = S.home;
+    const learnMore = stripArrow(S.common.learnMore);
+    const recognized = S.whyUs[S.whyUs.length - 1]; // "Recognized quality": the FANUC awards
     useDocumentMeta("", h.description);
+    // Step card of the process bento (step 0 is the lime tile).
+    const step = (i) => (
+        <Reveal delay={0.08 * i}>
+            <GlassCard tone="slate" hover innerClassName="flex flex-col p-6">
+                <span className="font-display text-sm font-bold text-lime">{num(i)}</span>
+                <h3 className="mt-3 font-display text-[clamp(1.1rem,2vw,1.35rem)] font-bold leading-tight text-[#fffffd] whole-words">{S.process[i].t}</h3>
+                <p className={`mt-4 ${body}`}>{S.process[i].d}</p>
+                <Photo file={HOME_PROCESS_IMAGES[i]} alt={S.process[i].t} className={`mt-6 w-full rounded-2xl object-cover ${IMAGE_SHAPE[i]}`} />
+            </GlassCard>
+        </Reveal>
+    );
     return (
         <>
-            <section className="relative overflow-hidden bg-navy text-white" data-testid="hero">
-                <div className="bg-dots absolute inset-0" aria-hidden="true" />
-                <div className="absolute -left-32 top-1/3 h-96 w-96 rounded-full bg-amber/10 blur-3xl" aria-hidden="true" />
-                <Container className="relative grid items-center gap-10 py-16 lg:grid-cols-2 lg:py-24">
-                    <div className="animate-rise">
-                        <p className="mb-5 inline-block rounded-full border border-amber/50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber">{h.badge}</p>
-                        <h1 className={`${lang === "de" ? "hyphens-auto " : ""}text-[2.05rem] font-extrabold leading-[1.1] tracking-tight sm:text-5xl lg:text-[2.6rem] xl:hyphens-none xl:text-[3.4rem]`} data-testid="hero-title">
-                            {h.heroTitle[0]}<span className="text-amber">{h.heroTitle[1]}</span>{h.heroTitle[2]}
-                        </h1>
-                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-navy-200">{h.heroLead}</p>
-                        <div className="mt-9 flex flex-wrap gap-4">
-                            <ButtonLink to={p("contact")} data-testid="hero-contact">{h.ctaContact}</ButtonLink>
-                            <ButtonLink to={p("applications")} variant="ghost">{h.ctaApplications}</ButtonLink>
+            <Section tone="hero" divider={false} testid="hero">
+                <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)] lg:gap-12">
+                    <div>
+                        <DisplayHeading as="h1" parts={h.heroTitle} size="hero" testid="hero-title" />
+                        <div className="mt-8 flex flex-wrap gap-4 md:mt-10">
+                            <PillButton to={p("contact")} data-testid="hero-contact">{h.ctaContact}</PillButton>
+                            <PillButton to={p("applications")} variant="ghost" arrow={false}>{h.ctaApplications}</PillButton>
                         </div>
+                        <p className={`mt-8 max-w-[28rem] ${body}`}>{h.heroLead}</p>
                     </div>
-                    <div className="relative mx-auto w-full max-w-xl">
-                        <div className="absolute inset-6 rounded-3xl border border-white/10 bg-navy-700/60" aria-hidden="true" />
-                        <RobotArt className="relative w-full" />
-                    </div>
-                </Container>
-            </section>
+                    <Reveal delay={0.1} className="hidden sm:block sm:max-w-xl lg:max-w-none" data-testid="hero-photo">
+                        <GlassCard tone="moss" hover>
+                            <Photo file={HOME_HERO_IMAGE} alt={h.heroTitle.join("")} eager className="aspect-[4/3] w-full object-cover" />
+                        </GlassCard>
+                    </Reveal>
+                </div>
+            </Section>
 
-            <section className="border-b border-slate-200 bg-white" data-testid="stats">
-                <Container className="py-10">
-                    <dl className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-                        {S.stats.map((s) => (
-                            <div key={s.label} className="border-l-4 border-amber pl-5">
-                                <dt className="sr-only">{s.label}</dt>
-                                <dd className="text-4xl font-extrabold tracking-tight text-navy sm:text-5xl">{s.value}</dd>
-                                <p className="mt-1 text-sm font-semibold text-slate-500">{s.label}</p>
+            <Section tone="dark" pad="md">
+                <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
+                    <div className="min-w-0" data-testid="references">
+                        <DisplayHeading title={h.referencesTitle} size="sm" className="mb-5" />
+                        <LogoBand logos={CLIENT_LOGOS} />
+                    </div>
+                    <GlassCard tone="moss" data-testid="more-applications" innerClassName="bg-plus">
+                        <div className="flex items-center gap-4 p-5">
+                            <Photo file={HOME_PROMO_IMAGE} alt={h.moreTitle} className="h-24 w-24 shrink-0 rounded-2xl object-cover" />
+                            <div className="min-w-0">
+                                <h3 className="font-display text-lg font-bold leading-snug text-[#fffffd] whole-words">{h.moreTitle}</h3>
+                                <p className="mt-1.5 text-sm leading-relaxed text-mist">{getMoreApplications(lang).map((m) => m.title).join(", ")}.</p>
+                                <ArrowLink to={p("contact")} className="mt-3">{stripArrow(h.moreCta)}</ArrowLink>
                             </div>
-                        ))}
-                    </dl>
-                    <p className="mt-6 text-xs text-slate-400">{h.statsNote}</p>
-                </Container>
-            </section>
+                        </div>
+                    </GlassCard>
+                </div>
+            </Section>
 
-            <section className="py-20 lg:py-28" data-testid="intro">
-                <Container className="grid gap-12 lg:grid-cols-12">
-                    <div className="lg:col-span-5">
-                        <SectionHeading eyebrow={h.introEyebrow} title={h.introTitle} />
-                        <ButtonLink to={p("company")} variant="dark" className="mt-8">{h.introMore}</ButtonLink>
-                        <Photo file={COMPANY_IMAGES.home} alt={h.introTitle} className="mt-10 w-full max-w-sm rounded-xl" data-testid="intro-photo" />
+            <SplitImageSection image={COMPANY_IMAGES.home} alt={h.introTitle} imageTestid="intro-photo" testid="intro">
+                <Reveal>
+                    <DisplayHeading title={h.introTitle} />
+                    <div className="mt-6 space-y-4">{h.introText.map((t) => <p key={t} className={body}>{t}</p>)}</div>
+                    <PillButton to={p("company")} className="mt-8">{h.introMore}</PillButton>
+                    <div className="mt-10 grid gap-5 border-t border-white/[.14] pt-10 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                        {[[EyeIcon, S.company.visionTitle, S.company.visionText], [TargetIcon, S.company.missionTitle, S.company.missionText]].map(([Icon, title, text]) => (
+                            <GlassCard key={title} hover innerClassName="flex items-start gap-4 p-5">
+                                <Icon className="mt-1 h-9 w-9 shrink-0 text-lime" />
+                                <div>
+                                    <h3 className="font-display text-lg font-bold text-[#fffffd] whole-words">{title}</h3>
+                                    <p className="mt-2 text-sm leading-relaxed text-mist">{text}</p>
+                                </div>
+                            </GlassCard>
+                        ))}
                     </div>
-                    <div className="space-y-5 text-lg leading-relaxed lg:col-span-7">
-                        {h.introText.map((t) => <p key={t}>{t}</p>)}
+                </Reveal>
+            </SplitImageSection>
+
+            <StatBand items={S.stats} note={h.statsNote} />
+
+            <Section tone="teal" testid="applications">
+                <Reveal className="mx-auto max-w-3xl text-center">
+                    <DisplayHeading title={h.appsTitle} align="center" />
+                    <p className={`mt-5 ${body}`}>{h.appsCopy}</p>
+                </Reveal>
+                <ul className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    {HOME_FEATURED_APPLICATIONS.map((id, i) => {
+                        const a = getApplicationById(lang, id);
+                        const Icon = FEATURE_ICONS[i];
+                        return (
+                            <GlassCard as="li" key={id} hover active={i === 1} className={i === 2 ? "md:col-span-2 xl:col-span-1" : ""} innerClassName="flex h-full flex-col p-6">
+                                <span className="grid h-[76px] w-[76px] place-items-center rounded-full bg-deep-950 text-lime"><Icon className="h-9 w-9" /></span>
+                                <h3 className="mt-6 font-display text-[1.05rem] font-bold leading-snug text-[#fffffd] whole-words">{a.title}</h3>
+                                <p className="mt-3 flex-1 text-base leading-relaxed text-mist">{a.short}</p>
+                                <ArrowLink to={applicationPath(lang, id)} className="mt-6">{learnMore}</ArrowLink>
+                            </GlassCard>
+                        );
+                    })}
+                </ul>
+                <div className="mt-12 text-center"><PillButton to={p("applications")}>{S.nav.allApplications}</PillButton></div>
+            </Section>
+
+            <Section tone="dark" testid="process">
+                <Reveal className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                    <div className="max-w-2xl">
+                        <DisplayHeading title={h.processTitle} />
+                        <p className={`mt-5 ${body}`}>{h.processCopy}</p>
                     </div>
-                </Container>
-            </section>
+                    <PillButton to={p("contact")} className="self-start md:self-auto md:shrink-0">{S.common.inquiry}</PillButton>
+                </Reveal>
+                <BentoGrid className="mt-12 lg:mt-20">
+                    <BentoColumn>
+                        <Reveal>
+                            <GlassCard tone="lime" hover innerClassName="bg-plus p-5">
+                                <div className="flex items-center gap-4">
+                                    <span className="grid h-[68px] w-[68px] shrink-0 place-items-center rounded-full bg-deep-950 font-display text-xl font-bold text-lime">{num(0)}</span>
+                                    <h3 className="font-display text-xl font-bold leading-snug text-lime-ink whole-words">{S.process[0].t}</h3>
+                                </div>
+                                <p className="mt-4 text-sm leading-relaxed text-lime-ink/80">{S.process[0].d}</p>
+                            </GlassCard>
+                        </Reveal>
+                        {step(1)}
+                    </BentoColumn>
+                    {[2, 3].map((i) => (
+                        <BentoColumn key={i} raised={i === 3} className={i === 3 ? "md:col-span-2 lg:col-span-1" : ""}>
+                            {step(i)}
+                        </BentoColumn>
+                    ))}
+                </BentoGrid>
+            </Section>
 
-            <section className="bg-navy-50 py-20 lg:py-28" data-testid="applications">
-                <Container>
-                    <SectionHeading eyebrow={h.appsEyebrow} title={h.appsTitle} copy={h.appsCopy} />
-                    <ul className="mt-12 grid gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
-                        {getApplications(lang).map((a, i) => (
-                            <li key={a.id} className="bg-white">
-                                <Link to={applicationPath(lang, a.id)} className="group flex h-full flex-col p-7 transition-colors hover:bg-navy">
-                                    <span className="text-sm font-extrabold tracking-widest text-amber-600 group-hover:text-amber">{num(i)}</span>
-                                    <h3 className="mt-3 text-xl font-bold text-navy group-hover:text-white">{a.title}</h3>
-                                    <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 group-hover:text-navy-200">{a.short}</p>
-                                    <span className="mt-5 text-sm font-bold text-navy group-hover:text-amber">{S.common.learnMore}</span>
-                                </Link>
-                            </li>
-                        ))}
-                        <li className="bg-navy sm:col-span-2" data-testid="more-applications">
-                            <Link to={p("contact")} className="flex h-full flex-col justify-center p-7 text-white">
-                                <h3 className="text-xl font-bold">{h.moreTitle}</h3>
-                                <p className="mt-2 text-sm leading-relaxed text-navy-200">{getMoreApplications(lang).map((m) => m.title).join(", ")}.</p>
-                                <span className="mt-5 text-sm font-bold text-amber">{h.moreCta}</span>
-                            </Link>
-                        </li>
+            <SplitImageSection variant="bleed" image={COMPANY_IMAGES.values} alt={h.whyTitle} testid="why-us">
+                <Reveal>
+                    <DisplayHeading title={h.whyTitle} />
+                    <ul className="mt-9 space-y-4">
+                        {S.whyUs.map((w, i) => <IconRow key={w.t} icon={WHY_ICONS[i]} title={w.t}>{w.d}</IconRow>)}
                     </ul>
-                </Container>
-            </section>
+                </Reveal>
+            </SplitImageSection>
 
-            <section className="relative overflow-hidden bg-navy py-20 text-white lg:py-28" data-testid="industries">
-                <div className="bg-dots absolute inset-0 opacity-60" aria-hidden="true" />
-                <Container className="relative">
-                    <SectionHeading light eyebrow={h.industriesEyebrow} title={h.industriesTitle} copy={h.industriesCopy} />
-                    <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        {getIndustries(lang).map((i) => (
-                            <li key={i.id}>
-                                <Link to={industryPath(lang, i.id)} className="block h-full rounded-lg border border-white/15 bg-white/5 px-5 py-4 font-bold transition-colors hover:border-amber hover:bg-amber hover:text-navy-900">{i.title}</Link>
-                            </li>
-                        ))}
-                    </ul>
-                </Container>
-            </section>
-
-            <section className="py-20 lg:py-28" data-testid="process">
-                <Container>
-                    <SectionHeading eyebrow={h.processEyebrow} title={h.processTitle} copy={h.processCopy} />
-                    <ol className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {S.process.map((pr, i) => (
-                            <li key={pr.t} className="relative rounded-xl border border-slate-200 p-7">
-                                <span className="text-5xl font-extrabold text-amber/80">{i + 1}</span>
-                                <h3 className="mt-4 text-lg font-bold text-navy">{pr.t}</h3>
-                                <p className="mt-2 text-sm leading-relaxed">{pr.d}</p>
-                            </li>
-                        ))}
-                    </ol>
-                </Container>
-            </section>
-
-            <section className="bg-navy-50 py-20 lg:py-28" data-testid="why-us">
-                <Container>
-                    <SectionHeading eyebrow={h.whyEyebrow} title={h.whyTitle} />
-                    <ul className="mt-12 grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
-                        {S.whyUs.map((w) => (
-                            <li key={w.t} className="border-t-4 border-navy pt-5">
-                                <h3 className="text-lg font-bold text-navy">{w.t}</h3>
-                                <p className="mt-2 leading-relaxed">{w.d}</p>
-                            </li>
+            <Section tone="teal" testid="awards">
+                <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] lg:gap-14">
+                    <Reveal>
+                        <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-lime">{S.company.awardsTitle}</p>
+                        <DisplayHeading title={recognized.t} />
+                        <p className={`mt-6 ${body}`}>{recognized.d}</p>
+                        <PillButton to={p("company")} className="mt-8">{h.introMore}</PillButton>
+                    </Reveal>
+                    <ul className="grid gap-5 sm:grid-cols-2">
+                        {HOME_AWARD_IMAGES.map((file, i) => (
+                            <GlassCard as="li" key={file} tone={AWARD_TONES[i]} hover>
+                                <Photo file={file} alt={S.company.awardsTitle} className="aspect-[4/3] w-full object-cover" />
+                            </GlassCard>
                         ))}
                     </ul>
-                </Container>
-            </section>
+                </div>
+            </Section>
 
-            <section className="py-20 lg:py-28" data-testid="references">
-                <Container>
-                    <SectionHeading title={h.referencesTitle} />
-                    <ul className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                        {CLIENT_LOGOS.map((logo) => (
-                            <li key={logo.file} className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-4">
-                                <Photo file={logo.file} alt={logo.name} className="h-16 w-full object-contain" />
-                            </li>
-                        ))}
-                    </ul>
-                </Container>
-            </section>
+            <Section tone="dark" testid="industries">
+                <Reveal className="mx-auto max-w-3xl text-center">
+                    <DisplayHeading title={h.industriesTitle} align="center" />
+                    <p className={`mt-5 ${body}`}>{h.industriesCopy}</p>
+                </Reveal>
+                <ul className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-3">
+                    {HOME_INDUSTRIES.map((id) => {
+                        const ind = getIndustryById(lang, id);
+                        return (
+                            <GlassCard as="li" key={id} tone="slate" hover innerClassName="flex h-full flex-col p-4 lg:p-5">
+                                <Photo file={INDUSTRY_IMAGES[id].photos[0]} alt={ind.title} className="aspect-[3/2] w-full rounded-2xl object-cover" />
+                                <h3 className="mt-6 font-display text-[clamp(0.9rem,1.9vw,1.25rem)] font-bold leading-snug text-[#fffffd] whole-words">{ind.title}</h3>
+                                <p className="mb-6 mt-3 flex-1 text-base leading-relaxed text-mist">{ind.short}</p>
+                                <div><PillButton to={industryPath(lang, id)} size="sm" arrow={false}>{learnMore}</PillButton></div>
+                            </GlassCard>
+                        );
+                    })}
+                </ul>
+                <div className="mt-12 text-center"><PillButton to={p("industries")} variant="ghost" arrow={false}>{S.nav.allIndustries}</PillButton></div>
+            </Section>
 
-            <CtaBand title={h.ctaTitle} text={h.ctaText} />
+            <GlassCtaBand title={h.ctaTitle} text={h.ctaText} />
         </>
     );
 }

@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import App from "@/App";
 import { getApplications } from "@/data/applications";
 import { getIndustries } from "@/data/industries";
+import { HOME_AWARD_IMAGES, HOME_FEATURED_APPLICATIONS, HOME_HERO_IMAGE, HOME_INDUSTRIES } from "@/data/home";
 import { APPLICATION_IMAGES, AWARD_IMAGES, CLIENT_LOGOS, EVENT_PHOTOS, INDUSTRY_IMAGES, PROJECT_IMAGES } from "@/data/images";
 import { LANGS, PAGE_PATHS, STRINGS, pagePath } from "@/i18n";
 
@@ -43,16 +44,78 @@ describe.each(LANGS)("site in %s", (lang) => {
     const industries = getIndustries(lang);
     const p = (key) => pagePath(lang, key);
 
-    test("the home page shows the hero, four figures and all ten application cards with working links", () => {
+    test("the home page shows the hero, four figures, three featured applications and three industries with working links", () => {
         open(p("home"));
         expect(q("h1").textContent).toContain(HERO[lang]);
         expect(document.title).toBe(S.meta.defaultTitle);
         expect(document.documentElement.lang).toBe(lang);
         expect(all('[data-testid="stats"] dd')).toHaveLength(4);
-        const links = hrefs('[data-testid="applications"] a');
-        for (const a of apps) expect(links).toContain(`${p("applications")}/${a.slug}`);
+        expect(all('[data-testid="stats"] dd').map((d) => d.textContent)).toEqual(S.stats.map((s) => s.value));
+        const featured = HOME_FEATURED_APPLICATIONS.map((id) => `${p("applications")}/${apps.find((a) => a.id === id).slug}`);
+        expect(hrefs('[data-testid="applications"] a')).toEqual([...featured, p("applications")]);
         expect(q('[data-testid="more-applications"] a').getAttribute("href")).toBe(p("contact"));
-        expect(hrefs('[data-testid="industries"] a')).toEqual(industries.map((i) => `${p("industries")}/${i.slug}`));
+        const shown = HOME_INDUSTRIES.map((id) => `${p("industries")}/${industries.find((i) => i.id === id).slug}`);
+        expect(hrefs('[data-testid="industries"] a')).toEqual([...shown, p("industries")]);
+    });
+
+    test("the hero keeps its words whole and shows a FANUC photo on the right, loaded at once, without extra text", () => {
+        open(p("home"));
+        expect(q("h1").className).toContain("whole-words");
+        const photo = q('[data-testid="hero-photo"] img');
+        expect(new URL(photo.getAttribute("src"), "http://localhost").pathname).toBe(`/images/${HOME_HERO_IMAGE}`);
+        expect(HOME_HERO_IMAGE).toMatch(/^fanuc\//);
+        expect(fs.existsSync(fileOf(photo))).toBe(true);
+        expect(photo.getAttribute("loading")).toBe("eager");
+        expect(photo.getAttribute("alt")).toBe(q("h1").textContent);
+        expect(q('[data-testid="hero-photo"]').className).toContain("hidden"); // not shown on small phones
+        expect(q('[data-testid="hero"]').textContent).toBe(q("h1").textContent + S.home.ctaContact + S.home.ctaApplications + S.home.heroLead);
+    });
+
+    test("every display heading of the home page keeps its words whole: no hyphenation rule on any font-display element", () => {
+        open(p("home"));
+        const display = all("main .font-display");
+        expect(display.length).toBeGreaterThan(20);
+        for (const el of display) {
+            expect(el.className).not.toMatch(/hyphens:auto|overflow-wrap:anywhere/);
+            if (/^H[1-6]$/.test(el.tagName)) expect(el.className).toContain("whole-words");
+        }
+    });
+
+    test("the home page has its own dark header and footer; every other page keeps the standard ones", () => {
+        open(p("home"));
+        expect(q('[data-testid="logo"] rect').getAttribute("fill")).toBe("#e1ff7c");
+        expect(q('[data-testid="navbar"]').className).not.toContain("bg-navy");
+        expect(q('[data-testid="footer"]').className).not.toContain("bg-navy-900");
+        // The footer keeps the address and ends its last column with a button to the contact page.
+        expect(q('[data-testid="footer-address"]').textContent).toContain("Karlsruhe");
+        expect(hrefs('[data-testid="footer"] a')).toContain(p("contact"));
+        for (const key of ["company", "projects", "industries", "applications", "career", "events"]) {
+            open(p(key));
+            expect(q('[data-testid="logo"] rect').getAttribute("fill")).toBe("#FAAF3A");
+            expect(q('[data-testid="navbar"]').className).toContain("bg-navy");
+            expect(q('[data-testid="footer"]').className).toContain("bg-navy-900");
+        }
+    });
+
+    test("the home page uses only existing content: no text or logos of the design template, the awards and why-us items of the site", () => {
+        open(p("home"));
+        expect(container.textContent).not.toMatch(/lorem|ipsum|arobotic|youtube|logoipsum|testimonial|newsletter|\bblog\b/i);
+        // Why us: every item of the strings, in order; the awards section repeats "Recognized quality".
+        expect(all('[data-testid="why-us"] h3').map((h) => h.textContent)).toEqual(S.whyUs.map((w) => w.t));
+        expect(all('[data-testid="why-us"] li p').map((e) => e.textContent)).toEqual(S.whyUs.map((w) => w.d));
+        const recognized = S.whyUs[S.whyUs.length - 1];
+        expect(q('[data-testid="awards"] h2').textContent).toBe(recognized.t);
+        expect(q('[data-testid="awards"] p.mt-6').textContent).toBe(recognized.d);
+        // Four of the nine award photos, all of them from the company page's list.
+        const photos = all('[data-testid="awards"] img');
+        expect(photos.map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual(HOME_AWARD_IMAGES.map((f) => `/images/${f}`));
+        for (const f of HOME_AWARD_IMAGES) expect(AWARD_IMAGES).toContain(f);
+        expect(alts('[data-testid="awards"] img')).toEqual(HOME_AWARD_IMAGES.map(() => S.company.awardsTitle));
+        // Process steps and the industry cards.
+        expect(all('[data-testid="process"] h3').map((h) => h.textContent)).toEqual(S.process.map((x) => x.t));
+        expect(all('[data-testid="industries"] h3').map((h) => h.textContent)).toEqual(HOME_INDUSTRIES.map((id) => industries.find((i) => i.id === id).title));
+        expect(alts('[data-testid="industries"] img')).toEqual(HOME_INDUSTRIES.map((id) => industries.find((i) => i.id === id).title));
+        expect(q('[data-testid="cta-band"] h2').textContent).toBe(S.home.ctaTitle);
     });
 
     test.each(apps.map((a) => [a.slug, a.title]))("application page %s shows its title, benefits and solutions", (slug, title) => {

@@ -7,6 +7,8 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['"Manrope Variable"', "Arial", "sans-serif"],
+        // Display font of the home page (Unbounded 700, bundled through @fontsource, no external request).
+        display: ["Unbounded", '"Manrope Variable"', "Arial", "sans-serif"],
       },
       colors: {
         // Colours taken from irti-robotics.com: header/footer #113959, buttons #FAAF3A.
@@ -24,6 +26,20 @@ module.exports = {
           600: "#e8991a",
           100: "#fef1d8",
         },
+        // Home page palette, sampled from the Arobotic reference screenshot.
+        deep: {
+          950: "#001920", // darkest sections, footer
+          900: "#031a22", // hero, right edge
+          800: "#022d33", // main teal sections
+          700: "#063d44", // hero, left edge
+          600: "#06454e", // split panel
+          card: "#0b3036",
+        },
+        lime: {
+          DEFAULT: "#e1ff7c",
+          ink: "#011b00", // text on lime
+        },
+        mist: "#c4d5dc", // body text on dark
       },
       keyframes: {
         sway: {
