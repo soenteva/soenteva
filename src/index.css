@@ -25,6 +25,10 @@
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42'%3E%3Cpath d='M21 17v8M17 21h8' stroke='%23ffffff' stroke-opacity='.14' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
         background-size: 42px 42px;
     }
+    /* The photo of the selected tab item fades in; a plain CSS animation, so the photo is swapped at once and never waits. */
+    .photo-fade-in {
+        animation: photo-fade-in 0.35s ease-out both;
+    }
     /* Marks a value the customer still has to confirm: stays light amber on the dark page so it is not overlooked. */
     .placeholder-mark {
         border-radius: 0.25rem;
@@ -34,6 +38,11 @@
         font-weight: 600;
         color: #0a2338;
     }
+}
+
+@keyframes photo-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

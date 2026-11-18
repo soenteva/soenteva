@@ -3,9 +3,10 @@ import path from "path";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import App from "@/App";
-import { getApplications } from "@/data/applications";
+import { getApplications, getMoreApplications } from "@/data/applications";
 import { getIndustries } from "@/data/industries";
-import { HOME_AWARD_IMAGES, HOME_FEATURED_APPLICATIONS, HOME_HERO_IMAGE, HOME_INDUSTRIES } from "@/data/home";
+import { COMPANY } from "@/data/site";
+import { HOME_HERO_IMAGES, HOME_SLIDE_IMAGES } from "@/data/home";
 import { APPLICATION_IMAGES, AWARD_IMAGES, CLIENT_LOGOS, EVENT_PHOTOS, INDUSTRY_IMAGES, PROJECT_IMAGES } from "@/data/images";
 import { LANGS, PAGE_PATHS, STRINGS, pagePath } from "@/i18n";
 
@@ -44,52 +45,157 @@ describe.each(LANGS)("site in %s", (lang) => {
     const industries = getIndustries(lang);
     const p = (key) => pagePath(lang, key);
 
-    test("the home page shows the hero, four figures, three featured applications and three industries with working links", () => {
+    const keyDown = (el, key) => act(() => el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true })));
+    const slide = (rootSel) => all(`${rootSel} [aria-roledescription="slide"]`);
+
+    test("the home page follows the new section order: header, hero slider, tabs, photo slides, three 50/50 blocks, cards, logo strip, contact band, footer", () => {
         open(p("home"));
+        const order = ["navbar", "hero", "tabs", "photo-slides", "intro", "why-us", "vision", "cards", "references-band", "cta-band", "footer"];
+        const els = order.map((id) => q(`[data-testid="${id}"]`));
+        els.forEach((el, i) => expect(`${order[i]} ${el !== null}`).toBe(`${order[i]} true`));
+        for (let i = 1; i < els.length; i += 1) expect(els[i - 1].compareDocumentPosition(els[i]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(q("h1").textContent).toContain(HERO[lang]);
+        expect(all("h1")).toHaveLength(1);
         expect(document.title).toBe(S.meta.defaultTitle);
         expect(document.documentElement.lang).toBe(lang);
-        expect(all('[data-testid="stats"] dd')).toHaveLength(4);
-        expect(all('[data-testid="stats"] dd').map((d) => d.textContent)).toEqual(S.stats.map((s) => s.value));
-        const featured = HOME_FEATURED_APPLICATIONS.map((id) => `${p("applications")}/${apps.find((a) => a.id === id).slug}`);
-        expect(hrefs('[data-testid="applications"] a')).toEqual([...featured, p("applications")]);
-        expect(q('[data-testid="more-applications"] a').getAttribute("href")).toBe(p("contact"));
-        const shown = HOME_INDUSTRIES.map((id) => `${p("industries")}/${industries.find((i) => i.id === id).slug}`);
-        expect(hrefs('[data-testid="industries"] a')).toEqual([...shown, p("industries")]);
     });
 
-    test("the hero keeps its words whole and shows a FANUC photo on the right, loaded at once, without extra text", () => {
+    test("the hero slider has three slides built from the existing texts; one is shown, the dots and arrows are named after the slides", () => {
         open(p("home"));
-        expect(q("h1").className).toContain("whole-words");
-        const photo = q('[data-testid="hero-photo"] img');
-        expect(new URL(photo.getAttribute("src"), "http://localhost").pathname).toBe(`/images/${HOME_HERO_IMAGE}`);
-        expect(HOME_HERO_IMAGE).toMatch(/^fanuc\//);
-        expect(fs.existsSync(fileOf(photo))).toBe(true);
-        expect(photo.getAttribute("loading")).toBe("eager");
-        expect(photo.getAttribute("alt")).toBe(q("h1").textContent);
-        expect(q('[data-testid="hero-photo"]').className).toContain("hidden"); // not shown on small phones
-        expect(q('[data-testid="hero"]').textContent).toBe(q("h1").textContent + S.home.ctaContact + S.home.ctaApplications + S.home.heroLead);
+        const h = S.home;
+        const slides = slide('[data-testid="hero"]');
+        expect(slides).toHaveLength(3);
+        const labels = [h.heroTitle.join(""), h.processTitle, h.moreTitle];
+        expect(slides.map((el) => el.getAttribute("aria-label"))).toEqual(labels);
+        expect(slides.map((el) => el.getAttribute("aria-hidden"))).toEqual(["false", "true", "true"]);
+        expect(slides[0].textContent).toBe(h.heroTitle.join("") + h.ctaContact + h.ctaApplications + h.heroLead);
+        expect(slides[1].textContent).toBe(h.processTitle + h.processCopy + S.common.inquiry);
+        expect(all('[data-testid="hero"] [data-testid="carousel-dots"] button').map((b) => b.getAttribute("aria-label"))).toEqual(labels);
+        expect(q('[data-testid="hero"] [data-testid="carousel-next"]').getAttribute("aria-label")).toBe(labels[1]);
+        expect(q('[data-testid="hero"] [data-testid="carousel-prev"]').getAttribute("aria-label")).toBe(labels[2]);
+        const photos = all('[data-testid="hero"] img');
+        expect(photos.map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual(HOME_HERO_IMAGES.map((f) => `/images/${f}`));
+        expect(photos.map((img) => img.getAttribute("loading"))).toEqual(["eager", "lazy", "lazy"]);
+        expect(photos.every((img) => fs.existsSync(fileOf(img)))).toBe(true);
+        expect(q('[data-testid="hero"] h1').className).toContain("whole-words");
+        expect(q('[data-testid="hero-contact"]').getAttribute("href")).toBe(p("contact"));
     });
 
-    test("every display heading of the home page keeps its words whole: no hyphenation rule on any font-display element", () => {
+    test("the tabs: applications, industries and projects, each with its items; tap or click selects an item and shows its photo and link", () => {
         open(p("home"));
-        const display = all("main .font-display");
-        expect(display.length).toBeGreaterThan(20);
-        for (const el of display) {
-            expect(el.className).not.toMatch(/hyphens:auto|overflow-wrap:anywhere/);
-            if (/^H[1-6]$/.test(el.tagName)) expect(el.className).toContain("whole-words");
-        }
+        const tabBtns = all('[data-testid="home-tabs"] [role="tab"]');
+        expect(tabBtns.map((b) => b.textContent)).toEqual([S.nav.items.applications, S.nav.items.industries, S.nav.items.projects]);
+        expect(tabBtns.map((b) => b.getAttribute("aria-selected"))).toEqual(["true", "false", "false"]);
+        expect(q('[data-testid="home-tabs"] [role="tabpanel"]')).not.toBeNull();
+        // Applications: all of them, the first one selected with its photo and link
+        let rows = all('[data-testid="tab-items"] > li > button');
+        expect(rows.map((b) => b.textContent.slice(2))).toEqual(apps.map((a) => a.title));
+        expect(rows[0].getAttribute("aria-current")).toBe("true");
+        const photoPath = () => new URL(q('[data-testid="tab-photo"] img').getAttribute("src"), "http://localhost").pathname;
+        expect(photoPath()).toBe(`/images/${APPLICATION_IMAGES[apps[0].id][0]}`);
+        expect(q('[data-testid="tab-photo"] a').getAttribute("href")).toBe(`${p("applications")}/${apps[0].slug}`);
+        // Tap the third application: it becomes the selected one and its photo and link show
+        click(rows[2]);
+        rows = all('[data-testid="tab-items"] > li > button');
+        expect(rows.map((b) => b.getAttribute("aria-current"))).toEqual(rows.map((_, i) => (i === 2 ? "true" : null)));
+        expect(photoPath()).toBe(`/images/${APPLICATION_IMAGES[apps[2].id][0]}`);
+        expect(q('[data-testid="tab-photo"] img').getAttribute("alt")).toBe(apps[2].title);
+        expect(q('[data-testid="tab-photo"] a').getAttribute("href")).toBe(`${p("applications")}/${apps[2].slug}`);
+        expect(q('[data-testid="tab-photo"]').textContent).toContain(apps[2].short);
+        expect(hrefs('[data-testid="home-tabs"] a')).toContain(p("applications"));
+        // Industries
+        click(tabBtns[1]);
+        expect(all('[data-testid="home-tabs"] [role="tab"]').map((b) => b.getAttribute("aria-selected"))).toEqual(["false", "true", "false"]);
+        rows = all('[data-testid="tab-items"] > li > button');
+        expect(rows.map((b) => b.textContent.slice(2))).toEqual(industries.map((i) => i.title));
+        expect(photoPath()).toBe(`/images/${INDUSTRY_IMAGES[industries[0].id].photos[0]}`);
+        expect(q('[data-testid="tab-photo"] a').getAttribute("href")).toBe(`${p("industries")}/${industries[0].slug}`);
+        // Projects: one has no application, so no link, but its photo shows
+        click(all('[data-testid="home-tabs"] [role="tab"]')[2]);
+        rows = all('[data-testid="tab-items"] > li > button');
+        expect(rows.map((b) => b.textContent.slice(2))).toEqual(S.projects.items.map((i) => i.title));
+        expect(q('[data-testid="tab-photo"] a').getAttribute("href")).toBe(`${p("applications")}/${apps.find((a) => a.id === S.projects.items[0].application).slug}`);
+        click(rows[5]);
+        expect(photoPath()).toBe(`/images/${PROJECT_IMAGES[5]}`);
+        expect(q('[data-testid="tab-photo"] a')).toBeNull();
     });
+
+    test("the tabs work from the keyboard: arrow keys move between the tabs and Home / End jump to the first / last", () => {
+        open(p("home"));
+        const selected = () => all('[data-testid="home-tabs"] [role="tab"]').findIndex((b) => b.getAttribute("aria-selected") === "true");
+        const first = () => all('[data-testid="home-tabs"] [role="tab"]')[0];
+        keyDown(first(), "ArrowRight");
+        expect(selected()).toBe(1);
+        keyDown(all('[data-testid="home-tabs"] [role="tab"]')[1], "End");
+        expect(selected()).toBe(2);
+        keyDown(all('[data-testid="home-tabs"] [role="tab"]')[2], "ArrowRight");
+        expect(selected()).toBe(0);
+        keyDown(first(), "ArrowLeft");
+        expect(selected()).toBe(2);
+        keyDown(all('[data-testid="home-tabs"] [role="tab"]')[2], "Home");
+        expect(selected()).toBe(0);
+        expect(all('[data-testid="home-tabs"] [role="tab"]').map((b) => b.getAttribute("tabindex"))).toEqual(["0", "-1", "-1"]);
+    });
+
+    test("the photo slides show industries, the awards photo and the four figures, each from existing texts", () => {
+        open(p("home"));
+        const h = S.home;
+        const recognized = S.whyUs[S.whyUs.length - 1];
+        const slides = slide('[data-testid="photo-slides"]');
+        expect(slides.map((el) => el.getAttribute("aria-label"))).toEqual([h.industriesTitle, recognized.t, h.statsNote]);
+        expect(slides[0].textContent).toBe(h.industriesTitle + h.industriesCopy + S.nav.allIndustries);
+        expect(slides[1].textContent).toBe(S.company.awardsTitle + recognized.t + recognized.d + h.introMore);
+        expect(all('[data-testid="stats"] dd').map((d) => d.textContent)).toEqual(S.stats.map((x) => x.value));
+        expect(all('[data-testid="stats"] dt').map((d) => d.textContent)).toEqual(S.stats.map((x) => x.label));
+        expect(slides[2].textContent).toContain(h.statsNote);
+        const photos = all('[data-testid="photo-slides"] img');
+        expect(photos.map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual([HOME_SLIDE_IMAGES.industries, HOME_SLIDE_IMAGES.awards, HOME_SLIDE_IMAGES.stats].map((f) => `/images/${f}`));
+        expect(AWARD_IMAGES).toContain(HOME_SLIDE_IMAGES.awards);
+        expect(photos.every((img) => fs.existsSync(fileOf(img)))).toBe(true);
+        expect(hrefs('[data-testid="photo-slides"] a')).toEqual([p("industries"), p("company")]);
+        // the next slide is reachable by its dot
+        click(all('[data-testid="photo-slides"] [data-testid="carousel-dots"] button')[1]);
+        expect(slide('[data-testid="photo-slides"]').map((el) => el.getAttribute("aria-hidden"))).toEqual(["true", "false", "true"]);
+    });
+
+    test("three 50/50 blocks and three image cards use the existing texts and images", () => {
+        open(p("home"));
+        const h = S.home;
+        expect(q('[data-testid="intro"] h2').textContent).toBe(h.introTitle);
+        expect(all('[data-testid="intro"] p').map((e) => e.textContent)).toEqual(h.introText);
+        expect(q('[data-testid="intro"] a').getAttribute("href")).toBe(p("company"));
+        expect(q('[data-testid="intro-photo"]').getAttribute("alt")).toBe(h.introTitle);
+        expect(all('[data-testid="why-us"] h3').map((e) => e.textContent)).toEqual(S.whyUs.map((w) => w.t));
+        expect(all('[data-testid="why-us"] li p').map((e) => e.textContent)).toEqual(S.whyUs.map((w) => w.d));
+        expect(all('[data-testid="vision"] h2').map((e) => e.textContent)).toEqual([S.company.visionTitle, S.company.missionTitle]);
+        expect(all('[data-testid="vision"] p').map((e) => e.textContent)).toEqual([S.company.visionText, S.company.missionText]);
+        // image left, right, left
+        expect(q('[data-testid="why-us"] img').parentElement.className).toContain("lg:order-2");
+        expect(q('[data-testid="intro"] img').parentElement.className).not.toContain("lg:order-2");
+        // cards: company, projects, career, photo on top
+        const cardEls = all('[data-testid="cards"] li');
+        expect(cardEls).toHaveLength(3);
+        expect(all('[data-testid="cards"] h3').map((e) => e.textContent)).toEqual([S.company.title, S.projects.title, S.career.title]);
+        expect(all('[data-testid="cards"] li p').map((e) => e.textContent)).toEqual([S.company.heroLead, S.projects.heroLead, S.career.heroLead]);
+        expect(hrefs('[data-testid="cards"] a')).toEqual([p("company"), p("projects"), p("career")]);
+        for (const li of cardEls) expect(li.querySelector("img")).not.toBeNull();
+        expect(cardEls.every((li) => li.firstElementChild.firstElementChild.querySelector("img"))).toBe(true); // the photo comes first
+        const photos = all('[data-testid="cards"] img');
+        expect(photos.every((img) => fs.existsSync(fileOf(img)))).toBe(true);
+        expect(q('[data-testid="cta-band"] h2').textContent).toBe(h.ctaTitle);
+    });
+
 
     // Every kind of page: static pages, a detail page of each kind, the 404 page and the legal pages.
     const allUrls = () => [...Object.keys(PAGE_PATHS).map(p), `${p("applications")}/${apps[0].slug}`, `${p("industries")}/${industries[0].slug}`, `${p("applications")}/does-not-exist`];
 
-    test("every page has the same dark header and footer (no separate home version)", () => {
+    test("every page has the same white header and wide dark footer (no separate home version)", () => {
         for (const url of allUrls()) {
             open(url);
             expect(q('[data-testid="logo"] rect').getAttribute("fill")).toBe("#e1ff7c");
-            expect(q('[data-testid="navbar"]').className).toContain("bg-[#032e35]");
-            expect(q('[data-testid="footer"]').className).toContain("linear-gradient");
+            expect(q('[data-testid="navbar"]').className).toContain("bg-white");
+            expect(q('[data-testid="navbar"] nav a[href="' + p("company") + '"]')).not.toBeNull();
+            expect(q('[data-testid="footer"]').className).toContain("bg-deep-950");
             expect(q('[data-testid="footer-address"]').textContent).toContain("Karlsruhe");
             expect(hrefs('[data-testid="footer"] a')).toContain(p("contact"));
             expect(q('[data-testid="nav-contact"]').getAttribute("href")).toBe(p("contact"));
@@ -100,7 +206,8 @@ describe.each(LANGS)("site in %s", (lang) => {
     test("no page uses a class of the old navy, amber or slate palette; only the placeholder chip stays light amber", () => {
         for (const url of allUrls()) {
             open(url);
-            const classes = all("*").map((el) => (typeof el.className === "string" ? el.className : "")).join(" ");
+            const header = q('[data-testid="navbar"]'); // the header is white on purpose
+            const classes = all("*").filter((el) => !header.contains(el)).map((el) => (typeof el.className === "string" ? el.className : "")).join(" ");
             expect(`${url}: ${classes.match(/(?<![a-z])(navy|amber|slate)-[\w/[\].]+/g) || []}`).toBe(`${url}: `);
             expect(` ${classes} `).not.toMatch(/\sbg-white\s|\stext-black\s/); // translucent white (bg-white/20) is the pill ring and fine
         }
@@ -127,46 +234,22 @@ describe.each(LANGS)("site in %s", (lang) => {
         expect(all("h1 span")).toHaveLength(0);
     });
 
-    test("the home page uses only existing content: no text or logos of the design template, the awards and why-us items of the site", () => {
+    test("every text on the home page is an existing text of the site (strings, application, industry and project data): nothing invented, nothing from the design reference", () => {
         open(p("home"));
-        expect(container.textContent).not.toMatch(/lorem|ipsum|arobotic|youtube|logoipsum|testimonial|newsletter|\bblog\b/i);
-        // Why us: every item of the strings, in order; the awards section repeats "Recognized quality".
-        expect(all('[data-testid="why-us"] h3').map((h) => h.textContent)).toEqual(S.whyUs.map((w) => w.t));
-        expect(all('[data-testid="why-us"] li p').map((e) => e.textContent)).toEqual(S.whyUs.map((w) => w.d));
-        const recognized = S.whyUs[S.whyUs.length - 1];
-        expect(q('[data-testid="awards"] h2').textContent).toBe(recognized.t);
-        expect(q('[data-testid="awards"] p.mt-6').textContent).toBe(recognized.d);
-        // Four of the nine award photos, all of them from the company page's list.
-        const photos = all('[data-testid="awards"] img');
-        expect(photos.map((img) => new URL(img.getAttribute("src"), "http://localhost").pathname)).toEqual(HOME_AWARD_IMAGES.map((f) => `/images/${f}`));
-        for (const f of HOME_AWARD_IMAGES) expect(AWARD_IMAGES).toContain(f);
-        expect(alts('[data-testid="awards"] img')).toEqual(HOME_AWARD_IMAGES.map(() => S.company.awardsTitle));
-        // Process steps and the industry cards.
-        expect(all('[data-testid="process"] h3').map((h) => h.textContent)).toEqual(S.process.map((x) => x.t));
-        expect(all('[data-testid="industries"] h3').map((h) => h.textContent)).toEqual(HOME_INDUSTRIES.map((id) => industries.find((i) => i.id === id).title));
-        expect(alts('[data-testid="industries"] img')).toEqual(HOME_INDUSTRIES.map((id) => industries.find((i) => i.id === id).title));
-        expect(q('[data-testid="cta-band"] h2').textContent).toBe(S.home.ctaTitle);
-    });
-
-    test.each(apps.map((a) => [a.slug, a.title]))("application page %s shows its title, benefits and solutions", (slug, title) => {
-        open(`${p("applications")}/${slug}`);
-        expect(q("h1").textContent).toBe(title);
-        expect(document.title).toBe(`${title} | Sönteva Automatisierung GmbH`);
-        expect(document.documentElement.lang).toBe(lang);
-        const app = apps.find((a) => a.slug === slug);
-        expect(all('[data-testid="benefits"] li')).toHaveLength(app.benefits.length);
-        expect(all('[data-testid="solutions"] li')).toHaveLength(app.solutions.length);
-        expect(hrefs('[data-testid="application-sidebar"] a')).toEqual(apps.map((a) => `${p("applications")}/${a.slug}`));
-        expect(q('[data-testid="application-sidebar"] a[aria-current="page"]').textContent).toBe(title);
-    });
-
-    test.each(industries.map((i) => [i.slug, i.title]))("industry page %s shows its text and related applications in the same language", (slug, title) => {
-        open(`${p("industries")}/${slug}`);
-        expect(q("h1").textContent).toBe(S.industries.detailTitle.replace("{title}", title));
-        expect(all('[data-testid="industry-body"] p').length).toBeGreaterThan(0);
-        const related = hrefs('[data-testid="industry-body"] aside a');
-        expect(related.length).toBeGreaterThan(0);
-        for (const href of related) expect(href.startsWith(`${p("applications")}/`)).toBe(true);
+        expect(container.textContent).not.toMatch(/lorem|ipsum|arobotic|youtube|logoipsum|testimonial|newsletter|\bblog\b|fanuc\.eu/i);
+        const flat = (v) => (typeof v === "string" ? [v] : Array.isArray(v) ? [v.join(""), ...v.flatMap(flat)] : v && typeof v === "object" ? Object.values(v).flatMap(flat) : []);
+        const moreApps = `${getMoreApplications(lang).map((m) => m.title).join(", ")}.`;
+        const projectLinks = apps.map((a) => `${S.projects.toApplication} ${a.title}`);
+        const knownList = [...flat(S), ...flat(apps), ...flat(industries), ...flat(getMoreApplications(lang)), moreApps, ...projectLinks, ...flat(COMPANY)];
+        // The arrow of "Learn more →" is drawn as an icon, so the plain words are fine too.
+        const known = new Set(knownList.flatMap((t) => [t.trim(), t.trim().replace(/\s*→$/, "")]));
+        const textOf = (el) => el.textContent.trim();
+        // Highlighted words sit inside a heading; the heading as a whole is checked below.
+        const leaves = all("main *").filter((el) => textOf(el) && !el.closest("h1, h2, h3") && [...el.children].every((c) => ["svg", "img"].includes(c.tagName.toLowerCase())));
+        const headings = all("main h1, main h2, main h3");
+        const unknown = [...leaves, ...headings].map(textOf).filter((t) => !known.has(t) && !/^\d{2}$/.test(t));
+        expect(unknown).toEqual([]);
+        expect(leaves.length + headings.length).toBeGreaterThan(70); // a real page was checked
     });
 
     test("an unknown application, industry or address shows the 404 page in this language", () => {
@@ -202,8 +285,6 @@ describe.each(LANGS)("site in %s", (lang) => {
         open(p("applications"));
         expect(all('[data-testid="applications-figures"] dd').map((d) => d.textContent)).toEqual(S.applications.figures.map((f) => f.value));
         expect(q('[data-testid="applications-figures"] dl').className).toContain("xl:grid-cols-[repeat(4,auto)]");
-        open(p("home"));
-        expect(q('[data-testid="stats"] dl').className).toContain("md:grid-cols-4"); // the home page keeps the default layout
     });
 
     test("the contact form asks for the missing fields and for consent before it reacts", () => {

@@ -1,7 +1,15 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
-import { BentoColumn, BentoGrid } from "@/components/BentoGrid";
+import Carousel from "@/components/Carousel";
+import HeroSlider from "@/components/HeroSlider";
+import ImageCard from "@/components/ImageCard";
+import PhotoSlides from "@/components/PhotoSlides";
+import SplitBlock from "@/components/SplitBlock";
+import TabbedSection from "@/components/TabbedSection";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Logo from "@/components/Logo";
 import DisplayHeading, { splitTitle } from "@/components/DisplayHeading";
 import GlassCard from "@/components/GlassCard";
 import CtaBand from "@/components/CtaBand";
@@ -113,7 +121,7 @@ describe("GlassCard", () => {
     });
 });
 
-describe("Section, BentoGrid, IconRow", () => {
+describe("Section, IconRow", () => {
     test("Section draws the band with divider, tone and a test id", () => {
         render(<Section tone="dark" testid="band"><p>Inside</p></Section>);
         const s = q('[data-testid="band"]');
@@ -121,14 +129,6 @@ describe("Section, BentoGrid, IconRow", () => {
         expect(s.className).toContain("bg-deep-950");
         expect(s.className).toContain("border-t");
         expect(s.textContent).toBe("Inside");
-    });
-
-    test("BentoGrid keeps its columns in order and raises the marked column", () => {
-        render(<BentoGrid data-testid="grid"><BentoColumn>A</BentoColumn><BentoColumn>B</BentoColumn><BentoColumn raised>C</BentoColumn></BentoGrid>);
-        const cols = [...q('[data-testid="grid"]').children];
-        expect(cols.map((c) => c.textContent)).toEqual(["A", "B", "C"]);
-        expect(cols[2].className).toContain("lg:-mt-");
-        expect(cols[0].className).not.toContain("lg:-mt-");
     });
 
     test("IconRow shows the icon disc, the title and the text", () => {
@@ -289,5 +289,221 @@ describe("Reveal", () => {
         render(<Reveal className="x"><p>Appears</p></Reveal>);
         expect(q(".x").getAttribute("style")).toContain("opacity: 0");
         expect(q(".x").textContent).toBe("Appears");
+    });
+});
+
+// ---------------------------------------------------------------- slides, tabs, blocks, header, footer
+const key = (el, k) => act(() => el.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true })));
+const tap = (el) => act(() => el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
+const slidesOf = (labels) => labels.map((label) => ({ key: label, label, render: () => <p>{label} text</p> }));
+const hiddenFlags = () => all('[aria-roledescription="slide"]').map((el) => el.getAttribute("aria-hidden"));
+const currentDot = () => all('[data-testid="carousel-dots"] button').findIndex((b) => b.getAttribute("aria-current") === "true");
+
+describe("Carousel", () => {
+    afterEach(() => { jest.useRealTimers(); });
+
+    test("shows one slide, keeps the others hidden from keyboard and screen readers, dots and arrows are named after the slides", () => {
+        render(<Carousel slides={slidesOf(["A", "B", "C"])} />);
+        expect(hiddenFlags()).toEqual(["false", "true", "true"]);
+        expect(all('[aria-roledescription="slide"]').map((el) => el.hasAttribute("inert"))).toEqual([false, true, true]);
+        expect(all('[data-testid="carousel-dots"] button').map((b) => b.getAttribute("aria-label"))).toEqual(["A", "B", "C"]);
+        expect(q('[data-testid="carousel-next"]').getAttribute("aria-label")).toBe("B");
+        expect(q('[data-testid="carousel-prev"]').getAttribute("aria-label")).toBe("C");
+        expect(q('[aria-roledescription="carousel"]').getAttribute("aria-label")).toBe("A");
+    });
+
+    test("dots, the next and previous arrows change the slide and wrap around", () => {
+        render(<Carousel slides={slidesOf(["A", "B", "C"])} />);
+        tap(q('[data-testid="carousel-next"]'));
+        expect(hiddenFlags()).toEqual(["true", "false", "true"]);
+        tap(q('[data-testid="carousel-prev"]'));
+        tap(q('[data-testid="carousel-prev"]'));
+        expect(hiddenFlags()).toEqual(["true", "true", "false"]); // wrapped to the last slide
+        tap(q('[data-testid="carousel-next"]'));
+        expect(currentDot()).toBe(0);
+        tap(all('[data-testid="carousel-dots"] button')[2]);
+        expect(currentDot()).toBe(2);
+    });
+
+    test("a swipe of the finger changes the slide, a tiny movement does not", () => {
+        render(<Carousel slides={slidesOf(["A", "B", "C"])} />);
+        const box = q('[aria-roledescription="carousel"]');
+        const drag = (from, to) => { act(() => box.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: from }))); act(() => box.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, clientX: to }))); };
+        drag(300, 100);
+        expect(currentDot()).toBe(1); // swipe left: next
+        drag(100, 300);
+        expect(currentDot()).toBe(0); // swipe right: previous
+        drag(200, 190);
+        expect(currentDot()).toBe(0);
+    });
+
+    test("auto-advance moves on after the interval, pauses while the pointer or focus is on it and goes on afterwards", () => {
+        jest.useFakeTimers();
+        render(<Carousel autoplay interval={1000} slides={slidesOf(["A", "B", "C"])} />);
+        act(() => { jest.advanceTimersByTime(1000); });
+        expect(currentDot()).toBe(1);
+        act(() => { jest.advanceTimersByTime(1000); });
+        expect(currentDot()).toBe(2);
+        const box = q('[aria-roledescription="carousel"]');
+        act(() => box.dispatchEvent(new MouseEvent("mouseover", { bubbles: true })));
+        act(() => { jest.advanceTimersByTime(5000); });
+        expect(currentDot()).toBe(2); // paused
+        act(() => box.dispatchEvent(new MouseEvent("mouseout", { bubbles: true })));
+        act(() => { jest.advanceTimersByTime(1000); });
+        expect(currentDot()).toBe(0); // wrapped round
+    });
+
+    test("without autoplay it never moves by itself; with a single slide there are no controls", () => {
+        jest.useFakeTimers();
+        render(<Carousel slides={slidesOf(["A", "B"])} />);
+        act(() => { jest.advanceTimersByTime(60000); });
+        expect(currentDot()).toBe(0);
+        render(<Carousel slides={slidesOf(["Only"])} />);
+        expect(q('[data-testid="carousel-dots"]')).toBeNull();
+    });
+});
+
+describe("HeroSlider and PhotoSlides", () => {
+    const slides = [
+        { key: "a", label: "First", image: "applications/assembly.webp", children: <h1>First text</h1> },
+        { key: "b", label: "Second", image: "industries/pallet.webp", side: "right", children: <h2>Second text</h2> },
+    ];
+    test("HeroSlider: a photo per slide behind the text, the first photo loads at once, the text sits in the slide", () => {
+        render(<HeroSlider slides={slides} />);
+        expect(q('[data-testid="hero"]').tagName).toBe("SECTION");
+        expect(all("img").map((i) => i.getAttribute("loading"))).toEqual(["eager", "lazy"]);
+        expect(all("img").map((i) => i.getAttribute("alt"))).toEqual(["First", "Second"]);
+        expect(all('[aria-roledescription="slide"]').map((el) => el.textContent)).toEqual(["First text", "Second text"]);
+        expect(q('[aria-roledescription="slide"] .bg-gradient-to-r')).not.toBeNull(); // dark overlay
+    });
+    test("PhotoSlides: the dark panel lies over the chosen side of the photo", () => {
+        render(<PhotoSlides slides={[{ ...slides[0], side: "left" }, slides[1]]} />);
+        const rows = all('[aria-roledescription="slide"] .relative.flex.py-14');
+        expect(rows.map((r) => r.className.includes("justify-end"))).toEqual([false, true]);
+        expect(all('[aria-roledescription="slide"] .backdrop-blur-sm').map((el) => el.textContent)).toEqual(["First text", "Second text"]);
+        expect(q('[data-testid="photo-slides"]').className).toContain("overflow-hidden");
+    });
+});
+
+describe("TabbedSection", () => {
+    const tabs = [
+        { id: "one", label: "One", more: { to: "/en/applications", label: "All" }, items: [
+            { key: "a", title: "Alpha", text: "About alpha", to: "/en/applications/alpha", linkLabel: "Learn more", image: "applications/assembly.webp", alt: "Alpha" },
+            { key: "b", title: "Beta", text: "About beta", to: "/en/applications/beta", linkLabel: "Learn more", image: "industries/pallet.webp", alt: "Beta" },
+        ] },
+        { id: "two", label: "Two", items: [{ key: "c", title: "Gamma", text: "", to: "", linkLabel: "", image: "fanuc/fanuc.webp", alt: "Gamma" }] },
+    ];
+    const src = () => new URL(q('[data-testid="tab-photo"] img').getAttribute("src"), "http://localhost").pathname;
+    afterEach(() => { delete window.matchMedia; });
+
+    test("phone and touch: a tap on an item opens it in place with its own photo, text and link; one item is always open", () => {
+        render(<TabbedSection tabs={tabs} testid="t" />);
+        expect(all('[role="tab"]').map((b) => b.getAttribute("aria-selected"))).toEqual(["true", "false"]);
+        expect(all('[data-testid="tab-photo"]')).toHaveLength(1);
+        expect(src()).toBe("/images/applications/assembly.webp");
+        const rows = all('[data-testid="tab-items"] > li > button');
+        expect(rows.map((b) => b.getAttribute("aria-expanded"))).toEqual(["true", "false"]);
+        tap(rows[1]);
+        expect(all('[data-testid="tab-items"] > li > button').map((b) => b.getAttribute("aria-expanded"))).toEqual(["false", "true"]);
+        expect(src()).toBe("/images/industries/pallet.webp");
+        expect(q('[data-testid="tab-photo"]').textContent).toContain("About beta");
+        expect(q('[data-testid="tab-photo"] a').getAttribute("href")).toBe("/en/applications/beta");
+        expect(q('[data-testid="tab-photo"] .photo-fade-in')).not.toBeNull(); // a CSS fade, not a script animation
+        expect(q('[data-testid="tab-items"] > li:nth-child(2)').contains(q('[data-testid="tab-photo"]'))).toBe(true); // the photo sits in the tapped row
+    });
+
+    test("a tab switch shows that tab's items, starts at the first item, and an item without link or text shows only its photo", () => {
+        render(<TabbedSection tabs={tabs} testid="t" />);
+        tap(all('[data-testid="tab-items"] > li > button')[1]);
+        tap(all('[role="tab"]')[1]);
+        expect(all('[data-testid="tab-items"] > li').map((li) => li.querySelector("button span:last-child").textContent)).toEqual(["Gamma"]);
+        expect(src()).toBe("/images/fanuc/fanuc.webp");
+        expect(q('[data-testid="tab-photo"] a')).toBeNull();
+        expect(q('[data-testid="tab-photo"] p')).toBeNull();
+        tap(all('[role="tab"]')[0]);
+        expect(all('[data-testid="tab-items"] > li > button')[0].getAttribute("aria-expanded")).toBe("true"); // back at the first item
+    });
+
+    test("wide screen: the photo stands left of the list and follows a click or keyboard focus on an item, swapped at once", () => {
+        window.matchMedia = (query) => ({ matches: true, media: query, addEventListener() {}, removeEventListener() {} });
+        render(<TabbedSection tabs={tabs} testid="t" />);
+        const photo = q('[data-testid="tab-photo"]');
+        expect(q('[data-testid="tab-items"]').contains(photo)).toBe(false);
+        expect(src()).toBe("/images/applications/assembly.webp");
+        act(() => all('[data-testid="tab-items"] > li > button')[1].focus());
+        expect(src()).toBe("/images/industries/pallet.webp");
+        tap(all('[data-testid="tab-items"] > li > button')[0]);
+        expect(src()).toBe("/images/applications/assembly.webp");
+        expect(all('[data-testid="tab-items"] > li > button').every((b) => !b.hasAttribute("aria-expanded"))).toBe(true);
+        expect(q('[role="tabpanel"] a[href="/en/applications"]').textContent).toBe("All");
+    });
+
+    test("the tabs form a proper tablist: arrow keys, roving tab index, panel named by its tab", () => {
+        render(<TabbedSection tabs={tabs} testid="t" />);
+        const tabEls = () => all('[role="tab"]');
+        key(tabEls()[0], "ArrowRight");
+        expect(tabEls().map((b) => b.getAttribute("aria-selected"))).toEqual(["false", "true"]);
+        expect(tabEls().map((b) => b.tabIndex)).toEqual([-1, 0]);
+        expect(q('[role="tabpanel"]').getAttribute("aria-labelledby")).toBe(tabEls()[1].id);
+        expect(tabEls()[0].getAttribute("aria-controls")).toBe(q('[role="tabpanel"]').id);
+        key(tabEls()[1], "ArrowLeft");
+        expect(tabEls()[0].getAttribute("aria-selected")).toBe("true");
+    });
+});
+
+describe("SplitBlock and ImageCard", () => {
+    test("SplitBlock: photo and text in two halves; the photo side and the tone can be switched", () => {
+        render(<><SplitBlock image="fanuc/fanuc.webp" alt="A" testid="x" imageSide="right" tone="dark"><p>Text</p></SplitBlock><SplitBlock image="fanuc/fanuc-cell.webp" alt="B" testid="y"><p>Other</p></SplitBlock></>);
+        expect(q('[data-testid="x"]').className).toContain("bg-deep-950");
+        expect(q('[data-testid="y"]').className).toContain("bg-deep-800");
+        expect(q('[data-testid="x"] img').parentElement.className).toContain("lg:order-2");
+        expect(q('[data-testid="y"] img').parentElement.className).not.toContain("lg:order-2");
+        expect(q('[data-testid="x"] .grid').className).toContain("lg:grid-cols-2");
+        expect(q('[data-testid="x"]').textContent).toBe("Text");
+    });
+    test("ImageCard: photo on top, then title, text and a link", () => {
+        render(<ul><ImageCard image="fanuc/fanuc.webp" alt="Alt" title="Title" text="Text" to="/en/company" linkLabel="Learn more" /></ul>);
+        const li = q("li");
+        expect(li.firstElementChild.firstElementChild.querySelector("img").getAttribute("alt")).toBe("Alt"); // photo first
+        expect(li.querySelector("h3").textContent).toBe("Title");
+        expect(li.querySelector("p").textContent).toBe("Text");
+        expect(li.querySelector("a").getAttribute("href")).toBe("/en/company");
+        expect(li.className).toContain("group");
+    });
+});
+
+describe("white header and wide dark footer", () => {
+    test("Navbar: white, logo and language switch on top, the navigation row below with the contact button inside it; burger on small screens", () => {
+        render(<Navbar />);
+        const header = q('[data-testid="navbar"]');
+        expect(header.className).toContain("bg-white");
+        expect(q('[data-testid="navbar"] nav').className).toContain("justify-between");
+        expect(all("nav a").map((a) => a.getAttribute("href"))).toEqual(expect.arrayContaining(["/en/company", "/en/projects", "/en/industries", "/en/applications", "/en/career", "/en/events", "/en/contact"]));
+        expect(q('[data-testid="nav-contact"]').closest("nav")).not.toBeNull();
+        expect(q('[data-testid="menu-toggle"]').parentElement.className).toContain("lg:hidden");
+        expect(q('[data-testid="lang-switch"]').parentElement.className).toContain("hidden");
+        expect(q('[data-testid="logo"] svg rect').getAttribute("stroke")).toBe("#022d33"); // the lime mark gets an outline on white
+        tap(q('[data-testid="menu-toggle"]'));
+        expect(q('[data-testid="mobile-menu"]').className).toContain("bg-white");
+        expect(all('[data-testid="mobile-menu"] a').length).toBeGreaterThan(20);
+    });
+    test("Logo: dark tone by default (no outline, white name), light tone for white backgrounds", () => {
+        render(<><Logo /><Logo tone="light" /></>);
+        const [dark, light] = all('[data-testid="logo"]');
+        expect(dark.querySelector("rect").getAttribute("stroke")).toBe("none");
+        expect(dark.querySelector("span span").className).toContain("text-[#fffffd]");
+        expect(light.querySelector("span span").className).toContain("text-deep-800");
+    });
+    test("Footer: full width, lime top edge, columns of content, all ten applications, address, legal links", () => {
+        render(<Footer />);
+        const f = q('[data-testid="footer"]');
+        expect(f.className).toContain("bg-deep-950");
+        expect(f.className).toContain("border-lime");
+        expect(f.firstElementChild.className).toContain("lg:grid-cols-[13rem_1fr_2fr_1.2fr]");
+        expect(f.firstElementChild.className).toContain("max-w-[1440px]");
+        expect(all('[data-testid="footer"] ul')[1].querySelectorAll("li")).toHaveLength(10);
+        expect(q('[data-testid="footer-address"]').textContent).toContain("Karlsruhe");
+        const links = all('[data-testid="footer"] a').map((a) => a.getAttribute("href"));
+        expect(links).toEqual(expect.arrayContaining(["/en/legal-notice", "/en/privacy", "/en/contact", "/en/events"]));
     });
 });

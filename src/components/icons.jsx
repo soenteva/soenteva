@@ -101,3 +101,15 @@ export const ChevronDownIcon = (props) => (
 
 // Icons of the six "why us" items, in the order of S.whyUs.
 export const WHY_ICONS = [RobotIcon, TargetIcon, FlagIcon, BoltIcon, WrenchIcon, AwardIcon];
+
+export const ChevronLeftIcon = (props) => (
+    <svg {...base} {...props}>
+        <path {...line} d="M14.5 6l-6 6 6 6" />
+    </svg>
+);
+
+export const ChevronRightIcon = (props) => (
+    <svg {...base} {...props}>
+        <path {...line} d="M9.5 6l6 6-6 6" />
+    </svg>
+);

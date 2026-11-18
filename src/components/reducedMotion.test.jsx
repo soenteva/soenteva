@@ -2,7 +2,9 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
 import GlassCard from "@/components/GlassCard";
+import Carousel from "@/components/Carousel";
 import LogoBand from "@/components/LogoBand";
+import TabbedSection from "@/components/TabbedSection";
 import PillButton from "@/components/PillButton";
 import Reveal from "@/components/Reveal";
 import { CLIENT_LOGOS } from "@/data/images";
@@ -45,6 +47,32 @@ test("buttons and cards still render and work, without hover motion props", () =
     expect(container.querySelector("a").getAttribute("href")).toBe("/kontakt");
     expect(container.querySelector('[data-testid="c"]').textContent).toBe("Card");
     expect(container.querySelector('[data-testid="c"]').getAttribute("style")).toBeNull();
+});
+
+test("the hero slider does not move by itself, and a slide change is instant (no fade)", () => {
+    jest.useFakeTimers();
+    const slides = ["A", "B", "C"].map((label) => ({ key: label, label, render: () => <p>{label}</p> }));
+    render(<Carousel autoplay interval={1000} slides={slides} />);
+    const dot = () => [...container.querySelectorAll('[data-testid="carousel-dots"] button')].findIndex((b) => b.getAttribute("aria-current") === "true");
+    act(() => { jest.advanceTimersByTime(30000); });
+    expect(dot()).toBe(0);
+    act(() => container.querySelector('[data-testid="carousel-next"]').dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
+    expect(dot()).toBe(1);
+    expect([...container.querySelectorAll('[aria-roledescription="slide"]')].map((el) => el.getAttribute("aria-hidden"))).toEqual(["true", "false", "true"]);
+    jest.useRealTimers();
+});
+
+test("the tabs still work, with the photo changing without animation", () => {
+    const tabs = [{ id: "a", label: "A", items: [
+        { key: "1", title: "One", text: "t1", to: "/x", linkLabel: "More", image: "applications/assembly.webp", alt: "One" },
+        { key: "2", title: "Two", text: "t2", to: "/y", linkLabel: "More", image: "industries/pallet.webp", alt: "Two" },
+    ] }];
+    render(<TabbedSection tabs={tabs} />);
+    act(() => container.querySelectorAll('[data-testid="tab-items"] > li > button')[1].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));
+    expect(container.querySelector('[data-testid="tab-photo"] img').getAttribute("alt")).toBe("Two");
+    expect(container.querySelector('[data-testid="tab-photo"] [style]')).toBeNull(); // no script-animated wrapper
+    // the fade is a CSS animation; index.css switches every animation off for reduced motion
+    expect(require("fs").readFileSync("src/index.css", "utf8")).toMatch(/prefers-reduced-motion: reduce[\s\S]*animation: none !important/);
 });
 
 function q(s) { return container.querySelector(s); }

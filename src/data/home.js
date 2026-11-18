@@ -1,19 +1,14 @@
-// Choices for the home page (which existing content goes where). The texts come from src/i18n, the images from public/images.
+// Choices for the home page (which existing image goes where). The texts come from src/i18n, the images from public/images.
+import { COMPANY_IMAGES, PROJECT_IMAGES } from "@/data/images";
 
-// Applications shown as the three feature cards (German slugs = ids); the overview page lists all of them.
-export const HOME_FEATURED_APPLICATIONS = ["montageautomation", "anlagenautomation", "maschinenbeschickung"];
+// Hero slider: one photo per slide (intro, process, more applications).
+export const HOME_HERO_IMAGES = ["applications/assembly.webp", "industries/pallet.webp", "applications/mig-welding.webp"];
 
-// Industries shown as the three cards at the end of the page (ids).
-export const HOME_INDUSTRIES = ["elektronik", "metall-maschinenbau", "lager-logistik"];
+// Photo slides with the dark panel: industries, awards (one of the FANUC award photos) and the figures.
+export const HOME_SLIDE_IMAGES = { industries: "industries/pick-place.webp", awards: "awards/awards9.jpg", stats: "fanuc/fanuc.webp" };
 
-// Photos of the process section: the index is the step of S.process (the first step is the lime tile, without photo).
-export const HOME_PROCESS_IMAGES = { 1: "applications/endtoend.webp", 2: "fanuc/fanuc-cell.webp", 3: "fanuc/fanuc.webp" };
+// The three 50/50 blocks: about, why us, vision and mission.
+export const HOME_BLOCK_IMAGES = { about: COMPANY_IMAGES.home, why: COMPANY_IMAGES.values, vision: "fanuc/fanuc-cell.webp" };
 
-// Four of the nine FANUC award photos: the trophy and certificate photos of 2025 and two photos of the 2025 ceremony.
-export const HOME_AWARD_IMAGES = ["awards/awards7.jpg", "awards/awards5.jpg", "awards/awards4.jpg", "awards/awards9.jpg"];
-
-// Small picture on the "more applications" card of the logo band.
-export const HOME_PROMO_IMAGE = "industries/tile-electronics.webp";
-
-// Photo on the right of the hero: a FANUC robot cell.
-export const HOME_HERO_IMAGE = "fanuc/fanuc-cell.webp";
+// The three cards: company, projects, career.
+export const HOME_CARD_IMAGES = { company: "applications/inspection.webp", projects: PROJECT_IMAGES[0], career: "applications/machine-tending4.webp" };
