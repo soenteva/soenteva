@@ -65,7 +65,7 @@ export const AWARD_IMAGES = [
 ];
 
 // Company page (team, values) and home page (about).
-export const COMPANY_IMAGES = { team: "events/1354.webp", values: "fanuc/fanuc-robot-values.webp", home: "fanuc/fanuc-robot-home.webp" };
+export const COMPANY_IMAGES = { team: "events/1354.webp", values: "applications/conveyor.webp", home: "fanuc/fanuc-robot-home.webp" };
 
 // Industries by id (the German slug): small picture for the overview, photos for the detail page.
 export const INDUSTRY_IMAGES = {
@@ -93,7 +93,7 @@ export const INDUSTRY_IMAGES = {
             "industries/voltas-palletization.webp",
             "applications/layer.webp",
             "applications/robotic-depalletzation.webp",
-            "industries/pallet.webp",
+            "applications/conveyor.webp",
             "applications/layer-palletization.webp",
         ],
     },
@@ -106,11 +106,11 @@ export const INDUSTRY_IMAGES = {
         ],
     },
     "schmieden-giessen": {
-        tile: "industries/tile-forging.webp",
+        tile: "applications/molten-metal.webp",
         photos: [
             "applications/forging.webp",
             "applications/molten-metal.webp",
-            "applications/sand-core-handling.webp",
+            "industries/machine-tending5.webp",
         ],
     },
     "konsumgueter": {
@@ -119,7 +119,7 @@ export const INDUSTRY_IMAGES = {
             "applications/packaging.webp",
             "industries/pick-place.webp",
             "applications/palletization.webp",
-            "industries/pallet.webp",
+            "applications/conveyor.webp",
         ],
     },
     "pharma": {
@@ -172,7 +172,7 @@ export const APPLICATION_IMAGES = {
     "montageautomation": [
         "applications/machine-tending4.webp",
         "applications/screawing.webp",
-        "applications/press.webp",
+        "applications/press-tending.webp",
         "applications/inspection.webp",
     ],
     "anlagenautomation": [
@@ -183,7 +183,7 @@ export const APPLICATION_IMAGES = {
     ],
     "schmieden-giessen": [
         "applications/molten-metal.webp",
-        "applications/sand-core-handling.webp",
+        "applications/forging.webp",
         "fanuc/fanuc-cell.webp",
     ],
     "materialhandhabung": [
@@ -359,9 +359,7 @@ const IMAGE_SIZES = {
     "applications/packaging1.webp": [971, 897],
     "applications/palletization.webp": [1465, 868],
     "applications/press-tending.webp": [1600, 900],
-    "applications/press.webp": [1600, 900],
     "applications/robotic-depalletzation.webp": [300, 168],
-    "applications/sand-core-handling.webp": [1600, 900],
     "applications/screawing.webp": [1600, 900],
     "applications/sculpturing.webp": [1600, 900],
     "applications/sorting.webp": [1000, 649],
@@ -463,7 +461,6 @@ const IMAGE_SIZES = {
     "events/womens5.webp": [960, 1280],
     "fanuc/fanuc-cell.webp": [800, 452],
     "fanuc/fanuc-robot-home.webp": [1080, 1200],
-    "fanuc/fanuc-robot-values.webp": [1600, 1365],
     "fanuc/fanuc.webp": [1280, 695],
     "industries/bearing.webp": [1600, 900],
     "industries/bomshell.webp": [1600, 900],
@@ -473,7 +470,6 @@ const IMAGE_SIZES = {
     "industries/flaming-cutting.webp": [1600, 900],
     "industries/machine-tending1.webp": [1600, 861],
     "industries/machine-tending5.webp": [1600, 900],
-    "industries/pallet.webp": [1600, 900],
     "industries/pharma.webp": [1024, 726],
     "industries/pick-place.webp": [1600, 900],
     "industries/plastic.webp": [1600, 900],
@@ -483,7 +479,6 @@ const IMAGE_SIZES = {
     "industries/tile-consumer.webp": [290, 174],
     "industries/tile-electronics.webp": [225, 225],
     "industries/tile-energy.webp": [225, 225],
-    "industries/tile-forging.webp": [297, 170],
     "industries/tile-plastics.webp": [300, 168],
     "industries/tile-warehousing.webp": [275, 183],
     "industries/trimming.webp": [1600, 900],

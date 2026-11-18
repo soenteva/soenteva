@@ -65,7 +65,7 @@ test("the hero slider does not move by itself, and a slide change is instant (no
 test("the tabs still work, with the photo changing without animation", () => {
     const tabs = [{ id: "a", label: "A", items: [
         { key: "1", title: "One", text: "t1", to: "/x", linkLabel: "More", image: "applications/assembly.webp", alt: "One" },
-        { key: "2", title: "Two", text: "t2", to: "/y", linkLabel: "More", image: "industries/pallet.webp", alt: "Two" },
+        { key: "2", title: "Two", text: "t2", to: "/y", linkLabel: "More", image: "industries/pick-place.webp", alt: "Two" },
     ] }];
     render(<TabbedSection tabs={tabs} />);
     act(() => container.querySelectorAll('[data-testid="tab-items"] > li > button')[1].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })));

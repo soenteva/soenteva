@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { getApplications, getMoreApplications, applicationPath } from "@/data/applications";
 import { APPLICATION_BANNER, APPLICATION_IMAGES, AWARD_IMAGES, CLIENT_LOGOS, COMPANY_IMAGES, EVENT_PHOTOS, IMAGE_FILES, INDUSTRY_IMAGES, PROJECT_IMAGES, imageUrl, photo } from "@/data/images";
+import { HOME_BLOCK_IMAGES, HOME_CARD_IMAGES, HOME_HERO_IMAGES, HOME_SLIDE_IMAGES } from "@/data/home";
 import { getIndustries, industryPath } from "@/data/industries";
 import { COMPANY, NAV } from "@/data/site";
 import { LANGS, STRINGS } from "@/i18n";
@@ -100,6 +101,33 @@ describe("images", () => {
         expect(files.reduce((sum, f) => sum + size(f), 0)).toBeLessThan(25 * 1024 * 1024);
     });
 
+    test("no photo shows twice in one industry or application page, and the home hero photos are landscape and at least 1600 px wide", () => {
+        for (const [id, { photos }] of Object.entries(INDUSTRY_IMAGES)) expect(`${id} ${new Set(photos).size}`).toBe(`${id} ${photos.length}`);
+        for (const [id, files] of Object.entries(APPLICATION_IMAGES)) expect(`${id} ${new Set(files).size}`).toBe(`${id} ${files.length}`);
+        for (const f of HOME_HERO_IMAGES) {
+            const { width, height } = photo(f);
+            expect(`${f} ${width >= 1600 && width > height}`).toBe(`${f} true`);
+        }
+    });
+
+    test("the images that carried a third-party watermark (eurobots, a stock-photo site) or a burned-in video player bar are gone and nothing refers to them", () => {
+        const removed = [
+            "fanuc/fanuc-robot-values.webp", "industries/tile-forging.webp", // watermarks
+            "applications/press.webp", "applications/sand-core-handling.webp", "industries/pallet.webp", // video player bar and icons
+        ];
+        for (const f of removed) {
+            expect(IMAGE_FILES).not.toContain(f);
+            expect(fs.existsSync(path.join(root, f))).toBe(false);
+        }
+        expect(JSON.stringify({ CLIENT_LOGOS, INDUSTRY_IMAGES, APPLICATION_IMAGES, PROJECT_IMAGES, EVENT_PHOTOS, COMPANY_IMAGES })).not.toMatch(/fanuc-robot-values|tile-forging|applications\/press\.webp|sand-core-handling|industries\/pallet\.webp/);
+        expect(INDUSTRY_IMAGES["schmieden-giessen"].tile).toBe("applications/molten-metal.webp");
+    });
+
+    test("the home page never shows one photo twice next to each other: every hero, slide, block and card photo is different", () => {
+        const shown = [...HOME_HERO_IMAGES, ...Object.values(HOME_SLIDE_IMAGES), ...Object.values(HOME_BLOCK_IMAGES), ...Object.values(HOME_CARD_IMAGES)];
+        expect(new Set(shown).size).toBe(shown.length);
+    });
+
     test("photos are WebP; only client logos and award images keep their original format", () => {
         for (const file of IMAGE_FILES) {
             const [category] = file.split("/");
@@ -183,7 +211,7 @@ describe("images", () => {
         expect(AWARD_IMAGES).toHaveLength(9);
         for (const f of AWARD_IMAGES) expect(f).toMatch(/^awards\/awards[1-9]\.jpg$/);
         expect(COMPANY_IMAGES.team).toMatch(/^events\//);
-        expect(COMPANY_IMAGES.values).toMatch(/^fanuc\//);
+        expect(COMPANY_IMAGES.values).toBe("applications/conveyor.webp");
         expect(COMPANY_IMAGES.home).toMatch(/^fanuc\//);
         expect(APPLICATION_BANNER).toMatch(/^applications\//);
     });

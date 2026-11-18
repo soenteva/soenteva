@@ -17,7 +17,7 @@ export default function PhotoSlides({ slides, testid = "photo-slides" }) {
                     key: s.key,
                     label: s.label,
                     render: (active) => (
-                        <div className="relative flex min-h-[560px] items-center sm:min-h-[520px] lg:min-h-[600px]">
+                        <div className="relative flex min-h-[560px] items-center sm:min-h-[520px] lg:min-h-[clamp(600px,50vw,900px)]">
                             <motion.div className="absolute inset-0" initial={false} animate={{ scale: ok && active ? 1 : 1.05 }} transition={{ duration: ok ? 1.2 : 0 }}>
                                 <Photo file={s.image} alt={s.label} className="h-full w-full object-cover" />
                             </motion.div>

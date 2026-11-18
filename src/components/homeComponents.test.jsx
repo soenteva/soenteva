@@ -258,7 +258,7 @@ describe("SplitImageSection", () => {
         expect(q('[data-testid="split"] h2').textContent).toBe("Content");
     });
     test("bleed: image fills half the page on one side, the content sits on the panel; the side can be switched", () => {
-        render(<SplitImageSection variant="bleed" imageSide="right" image="fanuc/fanuc-robot-values.webp" alt="Values" testid="split"><h2>Content</h2></SplitImageSection>);
+        render(<SplitImageSection variant="bleed" imageSide="right" image="fanuc/fanuc-cell.webp" alt="Values" testid="split"><h2>Content</h2></SplitImageSection>);
         const img = q('[data-testid="split"] img');
         expect(img.getAttribute("alt")).toBe("Values");
         expect(img.className).toContain("object-cover");
@@ -366,7 +366,7 @@ describe("Carousel", () => {
 describe("HeroSlider and PhotoSlides", () => {
     const slides = [
         { key: "a", label: "First", image: "applications/assembly.webp", children: <h1>First text</h1> },
-        { key: "b", label: "Second", image: "industries/pallet.webp", side: "right", children: <h2>Second text</h2> },
+        { key: "b", label: "Second", image: "industries/pick-place.webp", side: "right", children: <h2>Second text</h2> },
     ];
     test("HeroSlider: a photo per slide behind the text, the first photo loads at once, the text sits in the slide", () => {
         render(<HeroSlider slides={slides} />);
@@ -383,13 +383,23 @@ describe("HeroSlider and PhotoSlides", () => {
         expect(all('[aria-roledescription="slide"] .backdrop-blur-sm').map((el) => el.textContent)).toEqual(["First text", "Second text"]);
         expect(q('[data-testid="photo-slides"]').className).toContain("overflow-hidden");
     });
+    test("PhotoSlides: the slides grow with the width on wide screens (600px up to 900px), so less of the photo is cropped, and the photo stays undistorted", () => {
+        render(<PhotoSlides slides={slides} />);
+        const rows = all('[aria-roledescription="slide"] > .relative.flex');
+        expect(rows).toHaveLength(2);
+        rows.forEach((r) => {
+            expect(r.className).toContain("sm:min-h-[520px]");
+            expect(r.className).toContain("lg:min-h-[clamp(600px,50vw,900px)]");
+        });
+        all("img").forEach((i) => expect(i.className).toContain("object-cover"));
+    });
 });
 
 describe("TabbedSection", () => {
     const tabs = [
         { id: "one", label: "One", more: { to: "/en/applications", label: "All" }, items: [
             { key: "a", title: "Alpha", text: "About alpha", to: "/en/applications/alpha", linkLabel: "Learn more", image: "applications/assembly.webp", alt: "Alpha" },
-            { key: "b", title: "Beta", text: "About beta", to: "/en/applications/beta", linkLabel: "Learn more", image: "industries/pallet.webp", alt: "Beta" },
+            { key: "b", title: "Beta", text: "About beta", to: "/en/applications/beta", linkLabel: "Learn more", image: "industries/pick-place.webp", alt: "Beta" },
         ] },
         { id: "two", label: "Two", items: [{ key: "c", title: "Gamma", text: "", to: "", linkLabel: "", image: "fanuc/fanuc.webp", alt: "Gamma" }] },
     ];
@@ -405,7 +415,7 @@ describe("TabbedSection", () => {
         expect(rows.map((b) => b.getAttribute("aria-expanded"))).toEqual(["true", "false"]);
         tap(rows[1]);
         expect(all('[data-testid="tab-items"] > li > button').map((b) => b.getAttribute("aria-expanded"))).toEqual(["false", "true"]);
-        expect(src()).toBe("/images/industries/pallet.webp");
+        expect(src()).toBe("/images/industries/pick-place.webp");
         expect(q('[data-testid="tab-photo"]').textContent).toContain("About beta");
         expect(q('[data-testid="tab-photo"] a').getAttribute("href")).toBe("/en/applications/beta");
         expect(q('[data-testid="tab-photo"] .photo-fade-in')).not.toBeNull(); // a CSS fade, not a script animation
@@ -431,7 +441,7 @@ describe("TabbedSection", () => {
         expect(q('[data-testid="tab-items"]').contains(photo)).toBe(false);
         expect(src()).toBe("/images/applications/assembly.webp");
         act(() => all('[data-testid="tab-items"] > li > button')[1].focus());
-        expect(src()).toBe("/images/industries/pallet.webp");
+        expect(src()).toBe("/images/industries/pick-place.webp");
         tap(all('[data-testid="tab-items"] > li > button')[0]);
         expect(src()).toBe("/images/applications/assembly.webp");
         expect(all('[data-testid="tab-items"] > li > button').every((b) => !b.hasAttribute("aria-expanded"))).toBe(true);

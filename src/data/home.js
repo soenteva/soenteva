@@ -2,7 +2,7 @@
 import { COMPANY_IMAGES, PROJECT_IMAGES } from "@/data/images";
 
 // Hero slider: one photo per slide (intro, process, more applications).
-export const HOME_HERO_IMAGES = ["applications/assembly.webp", "industries/pallet.webp", "applications/mig-welding.webp"];
+export const HOME_HERO_IMAGES = ["applications/assembly.webp", "industries/ev.webp", "applications/mig-welding.webp"];
 
 // Photo slides with the dark panel: industries, awards (one of the FANUC award photos) and the figures.
 export const HOME_SLIDE_IMAGES = { industries: "industries/pick-place.webp", awards: "awards/awards9.jpg", stats: "fanuc/fanuc.webp" };
